@@ -4,12 +4,30 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import React, { FormEvent, useState } from "react";
 import { Input } from "../ui/input";
+import { signIn } from "next-auth/react";
 
 export default function PasswordSignIn() {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    console.log("submit");
+    e.preventDefault();
+
+    const formData = new FormData(e.target as HTMLFormElement);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    try {
+      const result = await signIn("credentials", {
+        username: email,
+        password,
+        redirect: false,
+      });
+
+      router.replace("/dashboard");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (

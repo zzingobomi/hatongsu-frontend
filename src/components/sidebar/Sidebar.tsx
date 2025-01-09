@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import React, { PropsWithChildren, useContext } from "react";
 import { Scrollbars } from "react-custom-scrollbars-2";
 import { HiX } from "react-icons/hi";
@@ -64,17 +65,18 @@ function Sidebar(props: SidebarProps) {
               </span>
               <div className={`mt-8 flex items-center justify-center`}>
                 <div className="me-2 flex h-[40px] w-[40px] items-center justify-center rounded-md bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
-                  <HiBolt className="h-5 w-5" />
+                  <div className="relative w-10 h-10 rounded-md overflow-hidden">
+                    <Image
+                      src="/hatongsu.jpg"
+                      alt="logo"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                 </div>
                 <h5 className="me-2 text-2xl font-bold leading-5 text-zinc-950 dark:text-white">
-                  Horizon AI
+                  Hatongsu
                 </h5>
-                <Badge
-                  variant="outline"
-                  className="my-auto w-max px-2 py-0.5 text-xs text-zinc-950 dark:border-none dark:bg-zinc-800 dark:text-white"
-                >
-                  FREE
-                </Badge>
               </div>
               <div className="mb-8 mt-8 h-px bg-zinc-200 dark:bg-white/10" />
               {/* Nav item */}
@@ -84,10 +86,6 @@ function Sidebar(props: SidebarProps) {
             </div>
             {/* Free Horizon Card    */}
             <div className="mb-9 mt-7">
-              <div className="flex justify-center">
-                <SidebarCard />
-              </div>
-
               {/* Sidebar profile info */}
               <div className="mt-5 flex w-full items-center rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
                 <a href="/dashboard/dashboard/settings">

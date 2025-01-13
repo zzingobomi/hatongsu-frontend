@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import AuthSession from "./_component/AuthSession";
 import "./globals.css";
+import RQProvider from "./_component/RQProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,7 +19,9 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={inter.className}>
-        <AuthSession>{children}</AuthSession>
+        <AuthSession>
+          <RQProvider>{children}</RQProvider>
+        </AuthSession>
       </body>
     </html>
   );

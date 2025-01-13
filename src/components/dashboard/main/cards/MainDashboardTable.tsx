@@ -213,7 +213,7 @@ function CheckTable(props: { tableData: any }) {
                       }[header.column.getIsSorted() as string] ?? null}
                     </TableHead>
                   );
-                })}{" "}
+                })}
               </tr>
             </TableHeader>
           ))}

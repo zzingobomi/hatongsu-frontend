@@ -10,5 +10,12 @@ export async function middleware() {
 
 // See "Matching Paths" below to learn more
 export const config = {
-  matcher: ["/dashboard"],
+  matcher: [
+    "/dashboard/album",
+    "/dashboard/chart",
+    "/dashboard/main",
+    "/dashboard/settings",
+    "/dashboard/upload",
+    "/dashboard/user",
+  ],
 };

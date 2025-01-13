@@ -24,7 +24,7 @@ export default function PasswordSignIn() {
         redirect: false,
       });
 
-      router.replace("/dashboard");
+      router.replace("/dashboard/main");
     } catch (err) {
       console.error(err);
     }

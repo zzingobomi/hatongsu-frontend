@@ -262,22 +262,21 @@ function CheckTable(props: { tableData: any }) {
             >
               <MdChevronLeft />
             </Button>
-
-            {/* {createPages(table.getPageCount()).map((pageNumber, index) => {
-       return (
-        <Button
-         className={`font-mediumflex p-0 items-center justify-center rounded-lg p-2 text-sm transition duration-200 ${
-          pageNumber === pageIndex + 1
-           ? ''
-           : 'border border-zinc-200 bg-[transparent] dark:border-zinc-800 dark:text-white'
-         }`}
-         onClick={() => table.setPageIndex(pageNumber - 1)}
-         key={index}
-        >
-         {pageNumber}
-        </Button>
-       );
-      })} */}
+            {createPages(table.getPageCount()).map((pageNumber, index) => {
+              return (
+                <Button
+                  className={`font-mediumflex p-0 items-center justify-center rounded-lg p-2 text-sm transition duration-200 ${
+                    pageNumber === pageIndex + 1
+                      ? ""
+                      : "border border-zinc-200 bg-[transparent] dark:border-zinc-800 dark:text-white"
+                  }`}
+                  onClick={() => table.setPageIndex(pageNumber - 1)}
+                  key={index}
+                >
+                  {pageNumber}
+                </Button>
+              );
+            })}
             <Button
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}

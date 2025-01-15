@@ -5,3 +5,7 @@
 ```bash
 pnpm dlx shadcn@latest add button
 ```
+
+##### TODO
+
+- hydration 에러 수정하기

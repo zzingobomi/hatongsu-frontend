@@ -29,6 +29,7 @@ import { Pagination } from "@/components/pagination/Pagination";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { TableSort } from "./TableSort";
+import Image from "next/image";
 
 interface AlbumImageTableProps {
   data: AlbumImage[];
@@ -60,7 +61,31 @@ export default function AlbumImageTable({
       columnHelper.accessor("path", {
         header: () => (
           <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-            PATH
+            이미지
+          </p>
+        ),
+        cell: (info) => {
+          const imagePath = info.getValue();
+
+          return (
+            <div className="relative w-16 h-16">
+              {" "}
+              {/* 이미지 크기 지정 */}
+              <Image
+                src={imagePath} // 이미지 경로
+                alt="Album Image" // 대체 텍스트
+                layout="fill" // 부모 div 크기에 맞게 채움
+                objectFit="cover" // 이미지 비율 유지
+                className="rounded-md" // 스타일 (예: 둥근 모서리)
+              />
+            </div>
+          );
+        },
+      }),
+      columnHelper.accessor("filename", {
+        header: () => (
+          <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+            파일명
           </p>
         ),
         cell: (info) => (

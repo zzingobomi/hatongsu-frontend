@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import AlbumGallery from "@/components/home/AlbumGallery";
@@ -5,27 +7,35 @@ import FerrisWheel from "@/components/home/FerrisWheel";
 
 export default function Main() {
   return (
-    <div className="flex flex-col gap-6 p-4">
-      <div className="flex gap-2">
-        <Button asChild>
-          <Link href="/login">로그인</Link>
-        </Button>
-        <Button asChild>
-          <Link href="/signup">회원가입</Link>
-        </Button>
-        <Button>로그아웃</Button>
-      </div>
-      <div>
-        <FerrisWheel
-          ferrisSize={1200}
-          basketSize={320}
-          numArms={8}
-          ferrisWheelColor={"#FFFFFF"}
-        />
-      </div>
-      {/* <div className="w-full">
-        <AlbumGallery />
-      </div> */}
-    </div>
+    <>
+      <header className="fixed top-0 left-0 w-full bg-white/30 shadow-sm backdrop-blur-lg dark:bg-gray-900/80 z-50">
+        <nav className="flex items-center justify-between px-6 py-4">
+          <div className="text-lg font-bold text-gray-800 dark:text-white">
+            <Link href="/">Hatongsu</Link>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <Button asChild variant="outline">
+              <Link href="/login">로그인</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/signup">회원가입</Link>
+            </Button>
+            <Button variant="destructive">로그아웃</Button>
+          </div>
+        </nav>
+      </header>
+
+      <main className="pt-[80px]">
+        <div>
+          <FerrisWheel />
+        </div>
+        {/* 
+        <div className="w-full">
+          <AlbumGallery />
+        </div> 
+        */}
+      </main>
+    </>
   );
 }

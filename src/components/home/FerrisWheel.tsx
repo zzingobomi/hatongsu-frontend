@@ -1,30 +1,42 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { Slider } from "@/components/ui/slider";
+import { Play, Pause, Rewind } from "lucide-react";
 
-type FerrisWheelProps = {
+enum PlaybackState {
+  PLAYING,
+  PAUSED,
+  REVERSE,
+}
+
+interface FerrisWheelProps {
   ferrisSize?: number;
   basketSize?: number;
   numArms?: number;
   baseSpeed?: number;
-  maxSpeed?: number;
+  //maxSpeed?: number;
   ferrisWheelColor?: string;
-};
+}
 
 const FerrisWheel = ({
-  ferrisSize = 400,
-  basketSize = 80,
+  ferrisSize = 1200,
+  basketSize = 360,
   numArms = 8,
-  baseSpeed = 20,
-  maxSpeed = 8,
-  ferrisWheelColor = "#600",
+  baseSpeed = 50,
+  //maxSpeed = 8,
+  ferrisWheelColor = "#ffffff",
 }: FerrisWheelProps) => {
+  const [playbackState, setPlaybackState] = useState<PlaybackState>(
+    PlaybackState.PAUSED
+  );
+
   const ferrisRef = useRef<HTMLDivElement>(null);
   const centerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
   const basketsRef = useRef<HTMLElement[]>([]);
+
+  console.log(window.innerWidth);
 
   // 크기 비율 계산
   const sizeRatio = ferrisSize / 400; // 400은 기본 크기
@@ -158,55 +170,41 @@ const FerrisWheel = ({
     };
   }, [ferrisSize, numArms, baseSpeed, sizeRatio]);
 
-  const handlePlay = () => timelineRef.current?.play();
-  const handlePause = () => timelineRef.current?.pause();
-  const handleReverse = () => timelineRef.current?.reverse();
-
-  const handleSpeedChange = (value: number[]) => {
-    if (timelineRef.current) {
-      timelineRef.current.timeScale(value[0]);
-      timelineRef.current.resume();
-    }
+  const handlePlay = () => {
+    timelineRef.current?.play();
+    setPlaybackState(PlaybackState.PLAYING);
   };
+  const handlePause = () => {
+    timelineRef.current?.pause();
+    setPlaybackState(PlaybackState.PAUSED);
+  };
+  const handleReverse = () => {
+    timelineRef.current?.reverse();
+    setPlaybackState(PlaybackState.REVERSE);
+  };
+
+  const getButtonClass = (state: PlaybackState) => {
+    const baseClass = "p-3 rounded-full shadow-lg transition-all duration-300";
+    const isActive = playbackState === state;
+    return `${baseClass} ${
+      isActive
+        ? "bg-white ring-2 ring-blue-400 scale-110"
+        : "bg-white/80 hover:bg-white"
+    }`;
+  };
+
+  // const handleSpeedChange = (value: number[]) => {
+  //   if (timelineRef.current) {
+  //     timelineRef.current.timeScale(value[0]);
+  //     timelineRef.current.resume();
+  //   }
+  // };
 
   return (
     <div
       className="w-full mx-auto p-4"
       style={{ maxWidth: `${ferrisSize + 32}px` }}
     >
-      <div className="mb-5 space-y-4">
-        <div className="flex gap-2">
-          <button
-            onClick={handlePlay}
-            className="px-3 py-2 bg-white/30 border border-gray-300 rounded-lg text-gray-600 hover:bg-white/40"
-          >
-            play
-          </button>
-          <button
-            onClick={handlePause}
-            className="px-3 py-2 bg-white/30 border border-gray-300 rounded-lg text-gray-600 hover:bg-white/40"
-          >
-            pause
-          </button>
-          <button
-            onClick={handleReverse}
-            className="px-3 py-2 bg-white/30 border border-gray-300 rounded-lg text-gray-600 hover:bg-white/40"
-          >
-            reverse
-          </button>
-        </div>
-
-        <div className="w-40">
-          <Slider
-            defaultValue={[1]}
-            max={maxSpeed}
-            min={0}
-            step={0.02}
-            onValueChange={handleSpeedChange}
-          />
-        </div>
-      </div>
-
       <div
         ref={ferrisRef}
         className="relative mx-auto rounded-full invisible"
@@ -226,6 +224,57 @@ const FerrisWheel = ({
             backgroundColor: ferrisWheelColor,
           }}
         />
+      </div>
+
+      {/* Controls */}
+      <div className="fixed bottom-[5%] left-1/2 transform -translate-x-1/2">
+        <div className="bg-black/20 backdrop-blur-sm px-6 py-3 rounded-full flex gap-4">
+          <button
+            onClick={handleReverse}
+            className={getButtonClass(PlaybackState.REVERSE)}
+          >
+            <Rewind
+              className={`w-6 h-6 ${
+                playbackState === PlaybackState.REVERSE
+                  ? "text-blue-600"
+                  : "text-gray-700"
+              }`}
+            />
+          </button>
+          <button
+            onClick={handlePause}
+            className={getButtonClass(PlaybackState.PAUSED)}
+          >
+            <Pause
+              className={`w-6 h-6 ${
+                playbackState === PlaybackState.PAUSED
+                  ? "text-blue-600"
+                  : "text-gray-700"
+              }`}
+            />
+          </button>
+          <button
+            onClick={handlePlay}
+            className={getButtonClass(PlaybackState.PLAYING)}
+          >
+            <Play
+              className={`w-6 h-6 ${
+                playbackState === PlaybackState.PLAYING
+                  ? "text-blue-600"
+                  : "text-gray-700"
+              }`}
+            />
+          </button>
+          {/* <div className="w-40">
+          <Slider
+            defaultValue={[1]}
+            max={maxSpeed}
+            min={0}
+            step={0.02}
+            onValueChange={handleSpeedChange}
+          />
+        </div> */}
+        </div>
       </div>
     </div>
   );

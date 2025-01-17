@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import AlbumGallery from "@/components/home/AlbumGallery";
 
 export default function Main() {
   return (
     <>
-      <div>메인페이지 입니다.</div>
       <Button>
         <Link href="/login" className="button">
           로그인
@@ -16,6 +16,9 @@ export default function Main() {
         </Link>
       </Button>
       <Button>로그아웃</Button>
+      <div>
+        <AlbumGallery />
+      </div>
     </>
   );
 }

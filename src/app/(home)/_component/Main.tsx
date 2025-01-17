@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import AlbumGallery from "@/components/home/AlbumGallery";
+import FerrisWheel from "@/components/home/FerrisWheel";
 
 export default function Main() {
   return (
@@ -14,9 +15,17 @@ export default function Main() {
         </Button>
         <Button>로그아웃</Button>
       </div>
-      <div className="w-full">
-        <AlbumGallery />
+      <div>
+        <FerrisWheel
+          ferrisSize={1200}
+          basketSize={320}
+          numArms={8}
+          ferrisWheelColor={"#FFFFFF"}
+        />
       </div>
+      {/* <div className="w-full">
+        <AlbumGallery />
+      </div> */}
     </div>
   );
 }

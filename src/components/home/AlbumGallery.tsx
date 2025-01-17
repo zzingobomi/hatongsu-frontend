@@ -18,10 +18,10 @@ export default function AlbumGallery() {
     status,
     error,
   } = useInfiniteQuery({
-    queryKey: ["album_gallery"],
+    queryKey: ["albumGallery"],
     queryFn: ({ pageParam = undefined }) =>
       getAlbumImagesCursor({
-        queryKey: ["albumImages", { cursor: pageParam, pageSize: 10 }],
+        queryKey: ["albumGallery", { cursor: pageParam, pageSize: 10 }],
       }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) =>

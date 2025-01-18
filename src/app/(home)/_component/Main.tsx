@@ -26,7 +26,7 @@ export default function Main() {
         </nav>
       </header>
 
-      <main className="pt-[80px]">
+      <main className="relative">
         <div>
           <FerrisWheel />
         </div>

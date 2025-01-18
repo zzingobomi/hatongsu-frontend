@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { Play, Pause, Rewind } from "lucide-react";
+import useWindowSize from "@/hooks/use-windowsize";
 
 enum PlaybackState {
   PLAYING,
@@ -10,60 +11,46 @@ enum PlaybackState {
   REVERSE,
 }
 
-interface FerrisWheelProps {
-  ferrisSize?: number;
-  basketSize?: number;
-  numArms?: number;
-  baseSpeed?: number;
-  //maxSpeed?: number;
-  ferrisWheelColor?: string;
-}
+export default function FerrisWheel() {
+  const { width } = useWindowSize();
+  const ferrisSize = width * 0.625;
+  const centerSize = 60;
+  const borderWidth = 12;
+  const numArms = 8;
+  const basketSize = 350;
+  const baseSpeed = 50;
 
-const FerrisWheel = ({
-  ferrisSize = 1200,
-  basketSize = 360,
-  numArms = 8,
-  baseSpeed = 50,
-  //maxSpeed = 8,
-  ferrisWheelColor = "#ffffff",
-}: FerrisWheelProps) => {
+  const ferrisRef = useRef<HTMLDivElement>(null);
+  const centerRef = useRef<HTMLDivElement>(null);
+  const pivotsRef = useRef<HTMLElement[]>([]);
+  const timelineRef = useRef<gsap.core.Timeline | null>(null);
   const [playbackState, setPlaybackState] = useState<PlaybackState>(
     PlaybackState.PAUSED
   );
 
-  const ferrisRef = useRef<HTMLDivElement>(null);
-  const centerRef = useRef<HTMLDivElement>(null);
-  const timelineRef = useRef<gsap.core.Timeline | null>(null);
-  const basketsRef = useRef<HTMLElement[]>([]);
-
-  console.log(window.innerWidth);
-
-  // 크기 비율 계산
-  const sizeRatio = ferrisSize / 400; // 400은 기본 크기
-  const armLength = 200 * sizeRatio;
-  const centerSize = 20 * sizeRatio;
-  const basketWidth = basketSize;
-  const basketHeight = basketWidth * (7 / 8);
-  const borderWidth = 4 * sizeRatio;
-
-  const addArms = (numArms: number) => {
+  const addArms = useCallback(() => {
     const center = centerRef.current;
     if (!center) return;
 
-    const space = 360 / numArms;
-    const pivotDistance = armLength + 10 * sizeRatio;
+    pivotsRef.current = [];
 
-    basketsRef.current = [];
+    const space = 360 / numArms;
+    const centerX = centerSize / 2;
+    const centerY = centerSize / 2;
 
     for (let i = 0; i < numArms; i++) {
       // Arm
       const arm = document.createElement("div");
       arm.className = "absolute";
-      arm.style.width = `${armLength}px`;
-      arm.style.height = `${6 * sizeRatio}px`;
-      arm.style.backgroundColor = ferrisWheelColor;
-      arm.style.left = `${10 * sizeRatio}px`;
-      arm.style.top = `${7 * sizeRatio}px`;
+      arm.style.width = `${ferrisSize / 2}px`;
+      arm.style.height = `${borderWidth}px`;
+      arm.style.backgroundColor = "white";
+      gsap.set(arm, {
+        x: centerX,
+        y: centerY - borderWidth / 2,
+        rotation: i * space - 90,
+        transformOrigin: "0 50%",
+      });
       center.appendChild(arm);
 
       // Pivot
@@ -71,21 +58,29 @@ const FerrisWheel = ({
       pivot.className = "absolute rounded-full";
       pivot.style.width = `${centerSize}px`;
       pivot.style.height = `${centerSize}px`;
-      pivot.style.backgroundColor = ferrisWheelColor;
-      pivot.style.top = `-${pivotDistance}px`;
-      center.appendChild(pivot);
+      pivot.style.backgroundColor = "white";
+      pivot.style.left = `${ferrisSize / 2 - centerSize / 2}px`;
+      gsap.set(pivot, {
+        x: 0,
+        y: -((centerSize - borderWidth) / 2),
+        rotation: -(i * space - 90),
+        transformOrigin: `50% 50%`,
+      });
+      pivotsRef.current.push(pivot);
+      arm.appendChild(pivot);
 
       // Basket
       const basket = document.createElement("div");
       basket.className = "absolute rounded-md";
-      basket.style.width = `${basketWidth}px`;
-      basket.style.height = `${basketHeight}px`;
+      basket.style.width = `${basketSize}px`;
+      basket.style.height = `${basketSize * (7 / 8)}px`;
       basket.style.backgroundImage = `url("basket.svg")`;
       basket.style.backgroundSize = "contain";
       basket.style.backgroundRepeat = "no-repeat";
-      basket.style.left = `-${30 * sizeRatio}px`;
-      basket.style.top = `${10 * sizeRatio}px`;
-      basketsRef.current.push(basket);
+      gsap.set(basket, {
+        x: -basketSize / 2 + centerSize / 2,
+        y: centerSize / 2,
+      });
       pivot.appendChild(basket);
 
       // Basket Window
@@ -107,68 +102,8 @@ const FerrisWheel = ({
       img.style.borderRadius = "10px";
       img.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.2)";
       basketWindow.appendChild(img);
-
-      gsap.set(pivot, {
-        rotation: i * space,
-        transformOrigin: `${10 * sizeRatio}px ${210 * sizeRatio}px`,
-      });
-      gsap.set(arm, {
-        rotation: i * space - 90,
-        transformOrigin: `0px ${3 * sizeRatio}px`,
-      });
-      gsap.set(basket, {
-        rotation: -i * space,
-        transformOrigin: "50% top",
-      });
     }
-  };
-
-  useEffect(() => {
-    if (!centerRef.current || !ferrisRef.current) return;
-
-    while (centerRef.current.firstChild) {
-      centerRef.current.removeChild(centerRef.current.firstChild);
-    }
-
-    const centerX = ferrisSize / 2 - centerSize / 2;
-    const centerY = ferrisSize / 2 - centerSize / 2;
-    gsap.set(centerRef.current, { x: centerX, y: centerY });
-
-    addArms(numArms);
-
-    timelineRef.current = gsap.timeline({
-      repeat: -1,
-    });
-
-    timelineRef.current
-      .to(centerRef.current, {
-        rotation: 360,
-        duration: baseSpeed,
-        ease: "none",
-      })
-      .to(
-        basketsRef.current,
-        {
-          rotation: "-=360",
-          duration: baseSpeed,
-          ease: "none",
-        },
-        0
-      );
-
-    gsap.from(ferrisRef.current, {
-      autoAlpha: 0,
-      duration: 1,
-    });
-
-    handlePause();
-
-    return () => {
-      if (timelineRef.current) {
-        timelineRef.current.kill();
-      }
-    };
-  }, [ferrisSize, numArms, baseSpeed, sizeRatio]);
+  }, [ferrisSize]);
 
   const handlePlay = () => {
     timelineRef.current?.play();
@@ -193,38 +128,84 @@ const FerrisWheel = ({
     }`;
   };
 
-  // const handleSpeedChange = (value: number[]) => {
-  //   if (timelineRef.current) {
-  //     timelineRef.current.timeScale(value[0]);
-  //     timelineRef.current.resume();
-  //   }
-  // };
+  useEffect(() => {
+    if (!centerRef.current || !ferrisRef.current) return;
+
+    while (centerRef.current.firstChild) {
+      console.log("remove");
+      centerRef.current.removeChild(centerRef.current.firstChild);
+    }
+
+    // Center, FerrisWheel 위치 설정
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight * 0.95 - centerSize / 2;
+    gsap.set(centerRef.current, {
+      x: centerX,
+      y: centerY,
+      xPercent: -50,
+      yPercent: -50,
+    });
+
+    gsap.set(ferrisRef.current, {
+      x: centerX,
+      y: centerY,
+      xPercent: -50,
+      yPercent: -50,
+    });
+  }, [width]);
+
+  useEffect(() => {
+    if (ferrisSize > 0) {
+      addArms();
+
+      timelineRef.current = gsap.timeline({
+        repeat: -1,
+      });
+
+      // FerrisWheel 회전 (Pivot은 반대 방향으로 회전)
+      timelineRef.current
+        .to(centerRef.current, {
+          rotation: 360,
+          duration: baseSpeed,
+          ease: "none",
+        })
+        .to(
+          pivotsRef.current,
+          {
+            rotation: "-=360",
+            duration: baseSpeed,
+            ease: "none",
+            transformOrigin: "50% 50%",
+          },
+          0
+        );
+
+      handlePause();
+    }
+
+    return () => {
+      if (timelineRef.current) {
+        timelineRef.current.kill();
+      }
+    };
+  }, [ferrisSize, addArms]);
 
   return (
-    <div
-      className="w-full mx-auto p-4"
-      style={{ maxWidth: `${ferrisSize + 32}px` }}
-    >
+    <div className="w-full mx-auto">
       <div
         ref={ferrisRef}
-        className="relative mx-auto rounded-full invisible"
+        className="absolute mx-auto rounded-full border-white"
         style={{
-          width: `${ferrisSize}px`,
-          height: `${ferrisSize}px`,
-          borderColor: ferrisWheelColor,
-          borderWidth: `${borderWidth}px`,
+          width: ferrisSize,
+          height: ferrisSize,
+          borderWidth: borderWidth,
         }}
-      >
-        <div
-          ref={centerRef}
-          className="absolute rounded-full"
-          style={{
-            width: `${centerSize}px`,
-            height: `${centerSize}px`,
-            backgroundColor: ferrisWheelColor,
-          }}
-        />
-      </div>
+      ></div>
+      <div
+        ref={centerRef}
+        className="absolute rounded-full bg-white"
+        style={{ width: centerSize, height: centerSize }}
+      ></div>
 
       {/* Controls */}
       <div className="fixed bottom-[5%] left-1/2 transform -translate-x-1/2">
@@ -265,19 +246,8 @@ const FerrisWheel = ({
               }`}
             />
           </button>
-          {/* <div className="w-40">
-          <Slider
-            defaultValue={[1]}
-            max={maxSpeed}
-            min={0}
-            step={0.02}
-            onValueChange={handleSpeedChange}
-          />
-        </div> */}
         </div>
       </div>
     </div>
   );
-};
-
-export default FerrisWheel;
+}

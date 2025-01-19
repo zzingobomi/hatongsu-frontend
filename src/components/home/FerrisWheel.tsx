@@ -2,13 +2,20 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { Play, Pause, Rewind } from "lucide-react";
+import { Play, Pause } from "lucide-react";
 import useWindowSize from "@/hooks/use-windowsize";
+import { useQuery } from "@tanstack/react-query";
+import {
+  AlbumImagesError,
+  AlbumImagesQuery,
+  AlbumImagesResponse,
+  getAlbumImages,
+} from "@/lib/getAlbumImages";
+import { AlbumImage } from "@/model/AlbumImage";
 
 enum PlaybackState {
   PLAYING,
   PAUSED,
-  REVERSE,
 }
 
 export default function FerrisWheel() {
@@ -23,87 +30,139 @@ export default function FerrisWheel() {
   const ferrisRef = useRef<HTMLDivElement>(null);
   const centerRef = useRef<HTMLDivElement>(null);
   const pivotsRef = useRef<HTMLElement[]>([]);
+  const observersRef = useRef<IntersectionObserver[]>([]);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
   const [playbackState, setPlaybackState] = useState<PlaybackState>(
     PlaybackState.PAUSED
   );
 
-  const addArms = useCallback(() => {
-    const center = centerRef.current;
-    if (!center) return;
+  const playbackStateRef = useRef(playbackState);
+  useEffect(() => {
+    playbackStateRef.current = playbackState;
+  }, [playbackState]);
 
-    pivotsRef.current = [];
+  const {
+    data: initData,
+    error,
+    isLoading,
+  } = useQuery<
+    AlbumImagesResponse,
+    AlbumImagesError,
+    AlbumImagesResponse,
+    [string, AlbumImagesQuery]
+  >({
+    queryKey: [
+      "albumImages",
+      {
+        pageIndex: 0,
+        pageSize: numArms,
+        sort: '[{"orderBy":"dateTimeOriginal","order":"desc"}]',
+      },
+    ],
+    queryFn: getAlbumImages,
+  });
 
-    const space = 360 / numArms;
-    const centerX = centerSize / 2;
-    const centerY = centerSize / 2;
-
-    for (let i = 0; i < numArms; i++) {
-      // Arm
-      const arm = document.createElement("div");
-      arm.className = "absolute";
-      arm.style.width = `${ferrisSize / 2}px`;
-      arm.style.height = `${borderWidth}px`;
-      arm.style.backgroundColor = "white";
-      gsap.set(arm, {
-        x: centerX,
-        y: centerY - borderWidth / 2,
-        rotation: i * space - 90,
-        transformOrigin: "0 50%",
+  const handleVisibilityChange =
+    (index: number) => (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (
+          !entry.isIntersecting &&
+          playbackStateRef.current === PlaybackState.PLAYING
+        ) {
+          console.log(`Pivot ${index} is now hidden`);
+        }
       });
-      center.appendChild(arm);
+    };
 
-      // Pivot
-      const pivot = document.createElement("div");
-      pivot.className = "absolute rounded-full";
-      pivot.style.width = `${centerSize}px`;
-      pivot.style.height = `${centerSize}px`;
-      pivot.style.backgroundColor = "white";
-      pivot.style.left = `${ferrisSize / 2 - centerSize / 2}px`;
-      gsap.set(pivot, {
-        x: 0,
-        y: -((centerSize - borderWidth) / 2),
-        rotation: -(i * space - 90),
-        transformOrigin: `50% 50%`,
-      });
-      pivotsRef.current.push(pivot);
-      arm.appendChild(pivot);
+  const addArms = useCallback(
+    (initData: AlbumImage[]) => {
+      const center = centerRef.current;
+      if (!center) return;
 
-      // Basket
-      const basket = document.createElement("div");
-      basket.className = "absolute rounded-md";
-      basket.style.width = `${basketSize}px`;
-      basket.style.height = `${basketSize * (7 / 8)}px`;
-      basket.style.backgroundImage = `url("basket.svg")`;
-      basket.style.backgroundSize = "contain";
-      basket.style.backgroundRepeat = "no-repeat";
-      gsap.set(basket, {
-        x: -basketSize / 2 + centerSize / 2,
-        y: centerSize / 2,
-      });
-      pivot.appendChild(basket);
+      observersRef.current.forEach((observer) => observer.disconnect());
+      observersRef.current = [];
+      pivotsRef.current = [];
 
-      // Basket Window
-      const basketWindow = document.createElement("div");
-      basketWindow.style.width = "77%";
-      basketWindow.style.height = "55%";
-      basketWindow.style.position = "absolute";
-      basketWindow.style.top = "20%";
-      basketWindow.style.left = "10%";
-      basket.appendChild(basketWindow);
+      const space = 360 / numArms;
+      const centerX = centerSize / 2;
+      const centerY = centerSize / 2;
 
-      //Image
-      const img = document.createElement("img");
-      img.src = "https://picsum.photos/200/300";
-      img.alt = "Basket";
-      img.style.width = "100%";
-      img.style.height = "100%";
-      img.style.objectFit = "cover";
-      img.style.borderRadius = "10px";
-      img.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.2)";
-      basketWindow.appendChild(img);
-    }
-  }, [ferrisSize]);
+      for (let i = 0; i < numArms; i++) {
+        // Arm
+        const arm = document.createElement("div");
+        arm.className = "absolute";
+        arm.style.width = `${ferrisSize / 2}px`;
+        arm.style.height = `${borderWidth}px`;
+        arm.style.backgroundColor = "white";
+        gsap.set(arm, {
+          x: centerX,
+          y: centerY - borderWidth / 2,
+          rotation: i * space,
+          transformOrigin: "0 50%",
+        });
+        center.appendChild(arm);
+
+        // Pivot
+        const pivot = document.createElement("div");
+        pivot.className = "absolute rounded-full";
+        pivot.innerText = `${i}`;
+        pivot.style.width = `${centerSize}px`;
+        pivot.style.height = `${centerSize}px`;
+        pivot.style.backgroundColor = "white";
+        pivot.style.left = `${ferrisSize / 2 - centerSize / 2}px`;
+        gsap.set(pivot, {
+          x: 0,
+          y: -((centerSize - borderWidth) / 2),
+          rotation: -(i * space),
+          transformOrigin: `50% 50%`,
+        });
+        pivotsRef.current.push(pivot);
+        arm.appendChild(pivot);
+
+        // Pivoit Observer
+        const observer = new IntersectionObserver(handleVisibilityChange(i), {
+          threshold: 0.5,
+        });
+        observer.observe(pivot);
+        observersRef.current.push(observer);
+
+        // Basket
+        const basket = document.createElement("div");
+        basket.className = "absolute rounded-md";
+        basket.style.width = `${basketSize}px`;
+        basket.style.height = `${basketSize * (7 / 8)}px`;
+        basket.style.backgroundImage = `url("basket.svg")`;
+        basket.style.backgroundSize = "contain";
+        basket.style.backgroundRepeat = "no-repeat";
+        gsap.set(basket, {
+          x: -basketSize / 2 + centerSize / 2,
+          y: centerSize / 2,
+        });
+        pivot.appendChild(basket);
+
+        // Basket Window
+        const basketWindow = document.createElement("div");
+        basketWindow.style.width = "77%";
+        basketWindow.style.height = "55%";
+        basketWindow.style.position = "absolute";
+        basketWindow.style.top = "20%";
+        basketWindow.style.left = "10%";
+        basket.appendChild(basketWindow);
+
+        //Image
+        const img = document.createElement("img");
+        img.src = initData[i].path;
+        img.alt = "Basket";
+        img.style.width = "100%";
+        img.style.height = "100%";
+        img.style.objectFit = "cover";
+        img.style.borderRadius = "10px";
+        img.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.2)";
+        basketWindow.appendChild(img);
+      }
+    },
+    [ferrisSize]
+  );
 
   const handlePlay = () => {
     timelineRef.current?.play();
@@ -112,20 +171,6 @@ export default function FerrisWheel() {
   const handlePause = () => {
     timelineRef.current?.pause();
     setPlaybackState(PlaybackState.PAUSED);
-  };
-  const handleReverse = () => {
-    timelineRef.current?.reverse();
-    setPlaybackState(PlaybackState.REVERSE);
-  };
-
-  const getButtonClass = (state: PlaybackState) => {
-    const baseClass = "p-3 rounded-full shadow-lg transition-all duration-300";
-    const isActive = playbackState === state;
-    return `${baseClass} ${
-      isActive
-        ? "bg-white ring-2 ring-blue-400 scale-110"
-        : "bg-white/80 hover:bg-white"
-    }`;
   };
 
   useEffect(() => {
@@ -155,8 +200,13 @@ export default function FerrisWheel() {
   }, [width]);
 
   useEffect(() => {
-    if (ferrisSize > 0) {
-      addArms();
+    const hasFerrisSize = ferrisSize > 0;
+    const hasInitData = initData !== undefined;
+    const hasAlbumImages =
+      initData?.albumImages && initData.albumImages.length > 0;
+
+    if (hasFerrisSize && hasInitData && hasAlbumImages) {
+      addArms(initData.albumImages);
 
       timelineRef.current = gsap.timeline({
         repeat: -1,
@@ -188,7 +238,13 @@ export default function FerrisWheel() {
         timelineRef.current.kill();
       }
     };
-  }, [ferrisSize, addArms]);
+  }, [ferrisSize, addArms, initData]);
+
+  useEffect(() => {
+    return () => {
+      observersRef.current.forEach((observer) => observer.disconnect());
+    };
+  }, []);
 
   return (
     <div className="w-full mx-auto">
@@ -210,42 +266,21 @@ export default function FerrisWheel() {
       {/* Controls */}
       <div className="fixed bottom-[5%] left-1/2 transform -translate-x-1/2">
         <div className="bg-black/20 backdrop-blur-sm px-6 py-3 rounded-full flex gap-4">
-          <button
-            onClick={handleReverse}
-            className={getButtonClass(PlaybackState.REVERSE)}
-          >
-            <Rewind
-              className={`w-6 h-6 ${
-                playbackState === PlaybackState.REVERSE
-                  ? "text-blue-600"
-                  : "text-gray-700"
-              }`}
-            />
-          </button>
-          <button
-            onClick={handlePause}
-            className={getButtonClass(PlaybackState.PAUSED)}
-          >
-            <Pause
-              className={`w-6 h-6 ${
-                playbackState === PlaybackState.PAUSED
-                  ? "text-blue-600"
-                  : "text-gray-700"
-              }`}
-            />
-          </button>
-          <button
-            onClick={handlePlay}
-            className={getButtonClass(PlaybackState.PLAYING)}
-          >
-            <Play
-              className={`w-6 h-6 ${
-                playbackState === PlaybackState.PLAYING
-                  ? "text-blue-600"
-                  : "text-gray-700"
-              }`}
-            />
-          </button>
+          {playbackState === PlaybackState.PLAYING ? (
+            <button
+              onClick={handlePause}
+              className="p-4 rounded-full shadow-lg bg-gray-700 hover:bg-gray-800"
+            >
+              <Pause className="w-8 h-8 text-white" />
+            </button>
+          ) : (
+            <button
+              onClick={handlePlay}
+              className="p-4 rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 animate-pulseSlow"
+            >
+              <Play className="w-8 h-8 text-white" />
+            </button>
+          )}
         </div>
       </div>
     </div>

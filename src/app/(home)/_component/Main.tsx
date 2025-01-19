@@ -30,11 +30,10 @@ export default function Main() {
         <div>
           <FerrisWheel />
         </div>
-        {/* 
-        <div className="w-full">
+
+        {/* <div className="w-full">
           <AlbumGallery />
-        </div> 
-        */}
+        </div> */}
       </main>
     </>
   );

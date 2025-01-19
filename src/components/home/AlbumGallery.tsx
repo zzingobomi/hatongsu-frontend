@@ -1,28 +1,27 @@
 "use client";
 
-import { getAlbumImagesCursor } from "@/lib/getAlbumImagesCursor";
-import { AlbumImage } from "@/model/AlbumImage";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useRef, useState } from "react";
-import { useInView } from "react-intersection-observer";
 import Image from "next/image";
+import { getAlbumImagesInfinite } from "@/lib/getAlbumImagesInfinite";
 
 export default function AlbumGallery() {
+  const ITEM_SIZE = 300;
+  const GAP_SIZE = 16;
+  const OVERSCAN = 3;
+
   const SCROLL_SPEED = 0.8;
   const MOMENTUM_STRENGTH = 70;
   const MOMENTUM_DECAY = 0.85;
 
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const parentRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [momentum, setMomentum] = useState(0);
   const [lastX, setLastX] = useState(0);
   const [lastTime, setLastTime] = useState(0);
-
-  const { ref, inView } = useInView({
-    threshold: 0.1,
-  });
 
   const {
     data,
@@ -32,37 +31,58 @@ export default function AlbumGallery() {
     status,
     error,
   } = useInfiniteQuery({
-    queryKey: ["albumGallery"],
+    queryKey: ["albumGalleryInfinite"],
     queryFn: ({ pageParam = undefined }) =>
-      getAlbumImagesCursor({
-        queryKey: ["albumGallery", { cursor: pageParam, pageSize: 10 }],
+      getAlbumImagesInfinite({
+        queryKey: [
+          "albumGalleryInfinite",
+          { nextCursor: pageParam, pageSize: 10 },
+        ],
       }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) =>
-      lastPage.hasNextPage ? lastPage.nextCursor : undefined,
+      lastPage.nextCursor ? lastPage.nextCursor : undefined,
+  });
+
+  const allItems = data?.pages.flatMap((page) => page.albumImages) ?? [];
+
+  const virtualizer = useVirtualizer({
+    horizontal: true,
+    count: hasNextPage ? allItems.length + 1 : allItems.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => ITEM_SIZE + GAP_SIZE,
+    overscan: OVERSCAN,
   });
 
   useEffect(() => {
-    if (inView && hasNextPage) {
+    const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
+
+    if (!lastItem) return;
+
+    if (
+      lastItem.index >= allItems.length - 1 &&
+      hasNextPage &&
+      !isFetchingNextPage
+    ) {
       fetchNextPage();
     }
-  }, [inView, hasNextPage, fetchNextPage]);
+  }, [virtualizer.getVirtualItems(), hasNextPage, isFetchingNextPage]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (!scrollContainerRef.current) return;
+    if (!parentRef.current) return;
     setIsDragging(true);
-    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
-    setScrollLeft(scrollContainerRef.current.scrollLeft);
+    setStartX(e.pageX - parentRef.current.offsetLeft);
+    setScrollLeft(parentRef.current.scrollLeft);
     setLastX(e.pageX);
     setLastTime(Date.now());
     setMomentum(0);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !scrollContainerRef.current) return;
+    if (!isDragging || !parentRef.current) return;
     e.preventDefault();
 
-    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const x = e.pageX - parentRef.current.offsetLeft;
     const walk = (x - startX) * SCROLL_SPEED;
 
     const currentTime = Date.now();
@@ -73,22 +93,21 @@ export default function AlbumGallery() {
       setMomentum(velocity * MOMENTUM_STRENGTH);
     }
 
-    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+    parentRef.current.scrollLeft = scrollLeft - walk;
     setLastX(e.pageX);
     setLastTime(currentTime);
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
-    if (scrollContainerRef.current && momentum !== 0) {
+    if (parentRef.current && momentum !== 0) {
       const startMomentum = momentum;
       let currentMomentum = startMomentum;
 
       const animate = () => {
-        if (!scrollContainerRef.current || Math.abs(currentMomentum) < 0.5)
-          return;
+        if (!parentRef.current || Math.abs(currentMomentum) < 0.5) return;
 
-        scrollContainerRef.current.scrollLeft -= currentMomentum;
+        parentRef.current.scrollLeft -= currentMomentum;
         currentMomentum *= MOMENTUM_DECAY;
         requestAnimationFrame(animate);
       };
@@ -107,7 +126,7 @@ export default function AlbumGallery() {
 
   return (
     <div
-      ref={scrollContainerRef}
+      ref={parentRef}
       className="overflow-x-scroll scrollbar-hide select-none"
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
@@ -118,32 +137,51 @@ export default function AlbumGallery() {
         WebkitOverflowScrolling: "touch",
       }}
     >
-      <div className="flex gap-4 p-4 min-w-max">
-        {data?.pages.map((page) =>
-          page.albumImages.map((image: AlbumImage) => (
+      <div
+        style={{
+          width: `${virtualizer.getTotalSize()}px`,
+          height: `${ITEM_SIZE}px`,
+          position: "relative",
+        }}
+      >
+        {virtualizer.getVirtualItems().map((virtualItem) => {
+          const item = allItems[virtualItem.index];
+
+          return (
             <div
-              key={image.id}
-              className="relative flex-none w-[300px] h-[300px]"
+              key={virtualItem.key}
+              className="absolute top-0"
+              style={{
+                left: `${virtualItem.start}px`,
+                width: `${ITEM_SIZE}px`,
+                height: `${ITEM_SIZE}px`,
+                paddingRight: `${GAP_SIZE}px`,
+              }}
             >
-              <Image
-                src={image.path}
-                alt="Album image"
-                className="object-cover rounded-lg"
-                width={300}
-                height={300}
-                draggable={false}
-                priority
-              />
+              {item ? (
+                <Image
+                  src={item.path}
+                  alt="Album image"
+                  className="object-cover rounded-lg"
+                  width={ITEM_SIZE}
+                  height={ITEM_SIZE}
+                  draggable={false}
+                  priority
+                />
+              ) : (
+                hasNextPage && (
+                  <div className="flex items-center justify-center h-full">
+                    {isFetchingNextPage ? (
+                      <div>Loading...</div>
+                    ) : (
+                      <div className="text-2xl opacity-50">→</div>
+                    )}
+                  </div>
+                )
+              )}
             </div>
-          ))
-        )}
-        <div ref={ref} className="flex items-center justify-center w-20">
-          {isFetchingNextPage ? (
-            <div>Loading...</div>
-          ) : hasNextPage ? (
-            <div className="text-2xl opacity-50">→</div>
-          ) : null}
-        </div>
+          );
+        })}
       </div>
     </div>
   );

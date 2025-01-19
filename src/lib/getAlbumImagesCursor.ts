@@ -10,7 +10,7 @@ export interface AlbumImagesCursorError {
   message: string;
 }
 
-export interface AlbumImagesQuery {
+export interface AlbumImagesCursorQuery {
   cursor?: string;
   pageSize: number;
 }
@@ -18,11 +18,11 @@ export interface AlbumImagesQuery {
 export const getAlbumImagesCursor = async ({
   queryKey,
 }: {
-  queryKey: [string, AlbumImagesQuery];
+  queryKey: [string, AlbumImagesCursorQuery];
 }): Promise<AlbumImagesCursorResponse> => {
   const [_key, { cursor, pageSize }] = queryKey;
 
-  const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/album/infinite`);
+  const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/album/cursor`);
   url.searchParams.append("limit", pageSize.toString());
   if (cursor) {
     url.searchParams.append("cursor", cursor);

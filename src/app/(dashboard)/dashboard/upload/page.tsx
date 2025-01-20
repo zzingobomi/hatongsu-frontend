@@ -1,12 +1,8 @@
-import Upload from "@/components/dashboard/upload";
+import UploadView from "@/components/dashboard/upload/UploadView";
+import { auth } from "@/auth";
 
 export default async function Page() {
-  const user = {
-    id: "1",
-    email: "zzingo5@gmail.com",
-    nickname: "귀여운 승연이",
-  };
-  const userDetails = {};
+  const session = await auth();
 
-  return <Upload userDetails={userDetails} user={user} />;
+  return <UploadView user={session?.user} />;
 }

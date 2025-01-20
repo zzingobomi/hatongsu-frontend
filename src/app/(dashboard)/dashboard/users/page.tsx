@@ -1,12 +1,8 @@
-import Users from "@/components/dashboard/users";
+import UsersView from "@/components/dashboard/users/UsersView";
+import { auth } from "@/auth";
 
 export default async function Page() {
-  const user = {
-    id: "1",
-    email: "zzingo5@gmail.com",
-    nickname: "귀여운 승연이",
-  };
-  const userDetails = {};
+  const session = await auth();
 
-  return <Users userDetails={userDetails} user={user} />;
+  return <UsersView user={session?.user} />;
 }

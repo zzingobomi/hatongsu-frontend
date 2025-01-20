@@ -9,20 +9,18 @@ import tableDataUserReports from "@/variables/tableDataUserReports";
 
 interface Props {
   user: User | null | undefined;
-  userDetails: { [x: string]: any } | null | any;
 }
 
-export default function Settings(props: Props) {
+export default function ChartView(props: Props) {
   return (
     <DashboardLayout
       user={props.user}
-      userDetails={props.userDetails}
-      title="Album Page"
-      description=""
+      title="Subscription Page"
+      description="Manage your subscriptions"
     >
       <div className="h-full w-full">
-        <div className="h-full w-full rounded-lg ">
-          <MainDashboardTable tableData={tableDataUserReports} />
+        <div className="mb-5 flex gap-5 flex-col xl:flex-row w-full">
+          <MainChart />
         </div>
       </div>
     </DashboardLayout>

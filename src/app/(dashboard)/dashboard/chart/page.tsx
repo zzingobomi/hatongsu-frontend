@@ -1,12 +1,8 @@
-import Chart from "@/components/dashboard/chart";
+import ChartView from "@/components/dashboard/chart/ChartView";
+import { auth } from "@/auth";
 
 export default async function Page() {
-  const user = {
-    id: "1",
-    email: "zzingo5@gmail.com",
-    nickname: "귀여운 승연이",
-  };
-  const userDetails = {};
+  const session = await auth();
 
-  return <Chart userDetails={userDetails} user={user} />;
+  return <ChartView user={session?.user} />;
 }

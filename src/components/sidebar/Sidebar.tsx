@@ -20,7 +20,7 @@ import { HiX } from "react-icons/hi";
 import { HiBolt } from "react-icons/hi2";
 import { HiOutlineArrowRightOnRectangle } from "react-icons/hi2";
 
-import { UserContext, UserDetailsContext } from "@/contexts/layout";
+import { UserContext } from "@/contexts/layout";
 
 import { IRoute } from "@/@types/types";
 
@@ -33,7 +33,6 @@ function Sidebar(props: SidebarProps) {
   const { routes } = props;
 
   const user = useContext(UserContext);
-  const userDetails = useContext(UserDetailsContext);
   const handleSignOut = async (e: React.MouseEvent<HTMLButtonElement>) => {
     // e.preventDefault();
     // supabase.auth.signOut();
@@ -92,15 +91,15 @@ function Sidebar(props: SidebarProps) {
                   <Avatar className="min-h-10 min-w-10">
                     <AvatarImage src={user?.profile} />
                     <AvatarFallback className="font-bold dark:text-zinc-950">
-                      {/* {userDetails.full_name
-                        ? `${userDetails.full_name[0]}`
-                        : `${user?.user_metadata.email[0].toUpperCase()}`} */}
+                      {props.user?.nickname
+                        ? props.user.nickname.charAt(0)
+                        : ""}
                     </AvatarFallback>
                   </Avatar>
                 </a>
                 <a href="/dashboard/settings">
                   <p className="ml-2 mr-3 flex items-center text-sm font-semibold leading-none text-zinc-950 dark:text-white">
-                    {userDetails?.full_name || user?.nickname || "User"}
+                    {user?.nickname || "User"}
                   </p>
                 </a>
                 <Button

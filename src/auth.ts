@@ -1,6 +1,7 @@
-import NextAuth, { CredentialsSignin, Session } from "next-auth";
+import NextAuth, { Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { User } from "./model/User";
 
 export const {
   handlers: { GET, POST },
@@ -49,7 +50,7 @@ export const {
             return null;
           }
 
-          const userData = await userResponse.json();
+          const { user: userData }: { user: User } = await userResponse.json();
 
           return {
             id: userData.id,

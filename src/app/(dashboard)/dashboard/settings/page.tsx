@@ -1,12 +1,8 @@
-import Settings from "@/components/dashboard/settings";
+import SettingsView from "@/components/dashboard/settings/SettingsView";
+import { auth } from "@/auth";
 
 export default async function Page() {
-  const user = {
-    id: "1",
-    email: "zzingo5@gmail.com",
-    nickname: "귀여운 승연이",
-  };
-  const userDetails = {};
+  const session = await auth();
 
-  return <Settings userDetails={userDetails} user={user} />;
+  return <SettingsView user={session?.user} />;
 }

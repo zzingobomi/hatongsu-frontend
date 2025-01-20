@@ -1,32 +1,32 @@
 "use server";
 
 import { auth } from "@/auth";
-import { AlbumImage } from "@/model/AlbumImage";
+import { User } from "@/model/User";
 
-export interface AlbumImagesResponse {
-  albumImages: AlbumImage[];
+export interface UsersResponse {
+  users: User[];
   totalCount: number;
 }
 
-export interface AlbumImagesError {
+export interface UsersError {
   message: string;
 }
 
-export interface AlbumImagesQuery {
+export interface UsersQuery {
   pageIndex: number;
   pageSize: number;
   sort: string;
 }
 
-export const getAlbumImages = async ({
+export const getUsers = async ({
   queryKey,
 }: {
-  queryKey: [string, AlbumImagesQuery];
-}): Promise<AlbumImagesResponse> => {
+  queryKey: [string, UsersQuery];
+}): Promise<UsersResponse> => {
   const session = await auth();
   const [_key, { pageIndex, pageSize, sort }] = queryKey;
 
-  const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/album`);
+  const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/all`);
   url.searchParams.append("page", (pageIndex + 1).toString());
   url.searchParams.append("limit", pageSize.toString());
   if (sort) {
@@ -41,7 +41,7 @@ export const getAlbumImages = async ({
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch album images");
+    throw new Error("Failed to fetch users");
   }
 
   return response.json();

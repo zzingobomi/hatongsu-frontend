@@ -4,7 +4,6 @@
 import DashboardLayout from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,17 +13,14 @@ import { User } from "@/model/User";
 
 interface Props {
   user: User | null | undefined;
-  userDetails: { [x: string]: any } | null;
 }
 
-export default function Settings(props: Props) {
+export default function SettingsView({ user }: Props) {
   // Input States
   const [nameError, setNameError] = useState<{
     status: boolean;
     message: string;
   }>();
-  console.log(props.user);
-  console.log(props.userDetails);
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -48,8 +44,7 @@ export default function Settings(props: Props) {
 
   return (
     <DashboardLayout
-      user={props.user}
-      userDetails={props.userDetails}
+      user={user}
       title="Account Settings"
       description="Profile settings."
     >
@@ -61,16 +56,14 @@ export default function Settings(props: Props) {
             }
           >
             <Avatar className="min-h-[68px] min-w-[68px]">
-              <AvatarImage src={props.user?.profile} />
+              <AvatarImage src={user?.profile} />
               <AvatarFallback className="text-2xl font-bold dark:text-zinc-950">
-                {props.user?.nickname
-                  ? `${props.user.nickname}`
-                  : `${props.user?.nickname}`}
+                {user?.nickname ? user.nickname.charAt(0) : ""}
               </AvatarFallback>
             </Avatar>
             <div>
               <p className="text-xl font-extrabold text-zinc-950 leading-[100%] dark:text-white pl-4 md:text-3xl">
-                {props.user?.nickname}
+                {user?.nickname}
               </p>
               <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400 md:mt-2 pl-4 md:text-base">
                 CEO and Founder
@@ -106,8 +99,7 @@ export default function Settings(props: Props) {
                 <Input
                   type="text"
                   name="fullName"
-                  // defaultValue={props.user?.user_metadata.full_name ?? ''}
-                  defaultValue={props.userDetails?.full_name ?? ""}
+                  defaultValue={user?.nickname ?? ""}
                   placeholder="Please enter your full name"
                   className={`mb-2 mr-4 flex h-full w-full px-4 py-4 outline-none md:mb-0`}
                 />
@@ -146,7 +138,7 @@ export default function Settings(props: Props) {
               >
                 <Input
                   placeholder="Please enter your email"
-                  defaultValue={props.user?.email ?? ""}
+                  defaultValue={user?.email ?? ""}
                   type="text"
                   name="newEmail"
                   className={`mr-4 flex h-full max-w-full w-full items-center justify-center px-4 py-4 outline-none`}

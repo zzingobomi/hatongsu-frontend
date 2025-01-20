@@ -1,12 +1,8 @@
-import Album from "@/components/dashboard/album";
+import AlbumView from "@/components/dashboard/album/AlbumView";
+import { auth } from "@/auth";
 
 export default async function Page() {
-  const user = {
-    id: "1",
-    email: "zzingo5@gmail.com",
-    nickname: "귀여운 승연이",
-  };
-  const userDetails = {};
+  const session = await auth();
 
-  return <Album user={user} userDetails={userDetails} />;
+  return <AlbumView user={session?.user} />;
 }

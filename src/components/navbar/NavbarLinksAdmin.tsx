@@ -10,8 +10,7 @@ import {
 import { OpenContext, UserContext } from "@/contexts/layout";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { MouseEvent, MouseEventHandler, useContext } from "react";
+import React, { useContext } from "react";
 import { FiAlignJustify } from "react-icons/fi";
 import {
   HiOutlineMoon,
@@ -20,7 +19,7 @@ import {
   HiOutlineArrowRightOnRectangle,
 } from "react-icons/hi2";
 
-export default function HeaderLinks(props: { [x: string]: any }) {
+export default function HeaderLinks() {
   const { open, setOpen } = useContext(OpenContext);
   const user = useContext(UserContext);
   const { theme, setTheme } = useTheme();
@@ -100,9 +99,7 @@ export default function HeaderLinks(props: { [x: string]: any }) {
         <Avatar className="h-9 min-w-9 md:min-h-10 md:min-w-10">
           <AvatarImage src={user?.profile} />
           <AvatarFallback className="font-bold">
-            {user?.nickname
-              ? `${user?.nickname}`
-              : `${user?.email[0].toUpperCase()}`}
+            {user?.nickname ? user.nickname.charAt(0) : ""}
           </AvatarFallback>
         </Avatar>
       </a>

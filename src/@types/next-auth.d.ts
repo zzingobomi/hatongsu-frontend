@@ -1,9 +1,12 @@
+import { UserRole } from "@/lib/user.role";
 import { DefaultSession } from "next-auth";
 
 export interface UserData {
   id: string;
-  email?: string;
-  nickname?: string;
+  email: string;
+  nickname: string;
+  profile?: string;
+  role: UserRole;
 }
 
 declare module "next-auth" {

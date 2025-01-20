@@ -15,17 +15,16 @@ import { OnChangeFn } from "@tanstack/react-table";
 
 interface Props {
   user: User | null | undefined;
-  userDetails: { [x: string]: any } | null | any;
 }
 
-export default function AlbumComponent(props: Props) {
+export default function AlbumView(props: Props) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
-  const [sort, setSort] = useState(
-    '[{"orderBy":"dateTimeOriginal","order":"desc"}]'
-  );
+
+  const initialSort = [{ orderBy: "dateTimeOriginal", order: "desc" }];
+  const [sort, setSort] = useState(JSON.stringify(initialSort));
 
   const { data, error, isLoading } = useQuery<
     AlbumImagesResponse,
@@ -49,12 +48,7 @@ export default function AlbumComponent(props: Props) {
   };
 
   return (
-    <DashboardLayout
-      user={props.user}
-      userDetails={props.userDetails}
-      title="Album Page"
-      description=""
-    >
+    <DashboardLayout user={props.user} title="Album Page" description="">
       <div className="h-full w-full">
         <div className="h-full w-full rounded-lg ">
           <AlbumImageTable

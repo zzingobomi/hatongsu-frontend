@@ -12,6 +12,7 @@ import {
   getAlbumImages,
 } from "@/lib/getAlbumImages";
 import { AlbumImage } from "@/model/AlbumImage";
+import { getAlbumImageFerrisNext } from "@/lib/getAlbumImageFerrisNext";
 
 enum PlaybackState {
   PLAYING,
@@ -35,11 +36,15 @@ export default function FerrisWheel() {
   const [playbackState, setPlaybackState] = useState<PlaybackState>(
     PlaybackState.PAUSED
   );
+  const sort = [{ orderBy: "dateTimeOriginal", order: "desc" }];
 
   const playbackStateRef = useRef(playbackState);
   useEffect(() => {
     playbackStateRef.current = playbackState;
   }, [playbackState]);
+
+  // TODO: 첫번째 이벤트를 건너뛰기 위한 로직 (좀더 generic 하게 수정 필요)
+  const firstEvent = useRef(true);
 
   const {
     data: initData,
@@ -56,7 +61,7 @@ export default function FerrisWheel() {
       {
         pageIndex: 0,
         pageSize: numArms,
-        sort: '[{"orderBy":"dateTimeOriginal","order":"desc"}]',
+        sort: JSON.stringify(sort),
       },
     ],
     queryFn: getAlbumImages,
@@ -64,12 +69,24 @@ export default function FerrisWheel() {
 
   const handleVisibilityChange =
     (index: number) => (entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
-        if (
-          !entry.isIntersecting &&
-          playbackStateRef.current === PlaybackState.PLAYING
-        ) {
-          console.log(`Pivot ${index} is now hidden`);
+      if (playbackStateRef.current === PlaybackState.PAUSED) return;
+      if (firstEvent.current) {
+        firstEvent.current = false;
+        return;
+      }
+
+      entries.forEach(async (entry) => {
+        if (!entry.isIntersecting) {
+          const targetElement = entry.target as HTMLElement;
+          const id = targetElement.dataset.id as string;
+
+          const nextImage = await getAlbumImageFerrisNext({
+            id,
+            skip: numArms,
+          });
+
+          targetElement.dataset.id = nextImage.albumImage.id;
+          targetElement.querySelector("img")!.src = nextImage.albumImage.path;
         }
       });
     };
@@ -104,8 +121,8 @@ export default function FerrisWheel() {
 
         // Pivot
         const pivot = document.createElement("div");
+        pivot.dataset.id = `${initData[numArms - 1 - i].id}`;
         pivot.className = "absolute rounded-full";
-        pivot.innerText = `${i}`;
         pivot.style.width = `${centerSize}px`;
         pivot.style.height = `${centerSize}px`;
         pivot.style.backgroundColor = "white";
@@ -151,7 +168,7 @@ export default function FerrisWheel() {
 
         //Image
         const img = document.createElement("img");
-        img.src = initData[i].path;
+        img.src = initData[numArms - 1 - i].path;
         img.alt = "Basket";
         img.style.width = "100%";
         img.style.height = "100%";
@@ -177,7 +194,6 @@ export default function FerrisWheel() {
     if (!centerRef.current || !ferrisRef.current) return;
 
     while (centerRef.current.firstChild) {
-      console.log("remove");
       centerRef.current.removeChild(centerRef.current.firstChild);
     }
 

@@ -1,11 +1,8 @@
-/*eslint-disable*/
 "use client";
 
-import MainChart from "@/components/dashboard/main/cards/MainChart";
-import MainDashboardTable from "@/components/dashboard/main/cards/MainDashboardTable";
 import DashboardLayout from "@/components/layout";
 import { User } from "@/model/User";
-import tableDataUserReports from "@/variables/tableDataUserReports";
+import CountDateChart from "./components/CountDateChart";
 
 interface Props {
   user: User | null | undefined;
@@ -20,7 +17,7 @@ export default function ChartView(props: Props) {
     >
       <div className="h-full w-full">
         <div className="mb-5 flex gap-5 flex-col xl:flex-row w-full">
-          <MainChart />
+          <CountDateChart />
         </div>
       </div>
     </DashboardLayout>

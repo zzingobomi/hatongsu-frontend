@@ -1,4 +1,3 @@
-/*eslint-disable*/
 "use client";
 
 import DashboardLayout from "@/components/layout";
@@ -7,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Notifications from "./components/notification-settings";
 import { Input } from "@/components/ui/input";
 import { User } from "@/model/User";
 
@@ -153,7 +151,6 @@ export default function SettingsView({ user }: Props) {
               </Button>
             </div>
           </Card>
-          <Notifications notifications={notifications} />
         </div>
       </div>
     </DashboardLayout>

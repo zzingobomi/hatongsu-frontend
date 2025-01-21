@@ -15,6 +15,7 @@ import UsersTable from "./components/UsersTable";
 
 interface Props {
   user: User | null | undefined;
+  inside?: boolean;
 }
 
 export default function UsersView(props: Props) {
@@ -46,6 +47,22 @@ export default function UsersView(props: Props) {
         : updaterOrValue
     );
   };
+
+  // TODO: 뭔가 맘에 안드는데.. 리팩토링?
+  if (props.inside) {
+    return (
+      <UsersTable
+        data={data?.users ?? []}
+        totalCount={data?.totalCount ?? 0}
+        pagination={pagination}
+        onPaginationChange={handlePaginationChange}
+        sort={sort}
+        setSort={setSort}
+        isLoading={isLoading}
+        error={error}
+      />
+    );
+  }
 
   return (
     <DashboardLayout user={props.user} title="User Page" description="">

@@ -1,5 +1,6 @@
 import NextAuth, { Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
+import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { User } from "./model/User";
 
@@ -13,6 +14,10 @@ export const {
     newUser: "/signup",
   },
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    }),
     CredentialsProvider({
       async authorize(credentials) {
         try {
@@ -66,6 +71,59 @@ export const {
     }),
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google/login`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                email: user.email,
+                nickname: user.name,
+                profile: user.image,
+                idToken: account.id_token,
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            return false;
+          }
+
+          const { accessToken, refreshToken } = await response.json();
+
+          const userResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/me`,
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          );
+
+          if (!userResponse.ok) {
+            return false;
+          }
+
+          const { user: userData }: { user: User } = await userResponse.json();
+
+          user.id = userData.id;
+          user.accessToken = accessToken;
+          user.refreshToken = refreshToken;
+          user.userData = userData;
+
+          return true;
+        } catch (error) {
+          console.error("Backend authentication error:", error);
+          return false;
+        }
+      }
+      return true;
+    },
     async jwt({ token, user, account }) {
       if (account && user) {
         return {

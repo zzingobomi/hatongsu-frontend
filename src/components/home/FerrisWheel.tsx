@@ -9,10 +9,10 @@ import {
   AlbumImagesError,
   AlbumImagesQuery,
   AlbumImagesResponse,
-  getAlbumImages,
 } from "@/lib/getAlbumImages";
 import { AlbumImage } from "@/model/AlbumImage";
 import { getAlbumImageFerrisNext } from "@/lib/getAlbumImageFerrisNext";
+import { getAlbumImagesFerrisFirst } from "@/lib/getAlbumImagesFerrisFirst";
 
 enum PlaybackState {
   PLAYING,
@@ -57,14 +57,14 @@ export default function FerrisWheel() {
     [string, AlbumImagesQuery]
   >({
     queryKey: [
-      "albumImages",
+      "albumImagesFerrisFirst",
       {
         pageIndex: 0,
         pageSize: numArms,
         sort: JSON.stringify(sort),
       },
     ],
-    queryFn: getAlbumImages,
+    queryFn: getAlbumImagesFerrisFirst,
   });
 
   const handleVisibilityChange =

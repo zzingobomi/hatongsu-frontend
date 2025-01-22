@@ -1,9 +1,7 @@
 "use client";
 
-import MainDashboardTable from "@/components/dashboard/main/cards/MainDashboardTable";
 import DashboardLayout from "@/components/layout";
 import { User } from "@/model/User";
-import tableDataUserReports from "@/variables/tableDataUserReports";
 import CountDateChart from "../chart/components/CountDateChart";
 import UsersView from "../users/UsersView";
 

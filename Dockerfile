@@ -3,7 +3,7 @@ WORKDIR /app
 
 COPY package.json pnpm-lock.yaml ./
 RUN npm install -g pnpm
-RUN pnpm install
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 RUN pnpm build
@@ -15,6 +15,9 @@ ENV NODE_ENV production
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
+
+# Install pnpm for production stage
+RUN npm install -g pnpm
 
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/pnpm-lock.yaml ./

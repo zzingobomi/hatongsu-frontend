@@ -8,7 +8,7 @@ RUN pnpm install
 COPY . .
 RUN pnpm build
 
-FROM node:20-alpine AS runner
+FROM node:20-alpine AS production
 WORKDIR /app
 
 ENV NODE_ENV production

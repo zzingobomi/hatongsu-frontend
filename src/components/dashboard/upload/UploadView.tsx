@@ -1,12 +1,8 @@
-/*eslint-disable*/
 "use client";
 
-import MainChart from "@/components/dashboard/main/cards/MainChart";
-import MainDashboardTable from "@/components/dashboard/main/cards/MainDashboardTable";
 import DashboardLayout from "@/components/layout";
 import Upload from "@/components/upload/Upload";
 import { User } from "@/model/User";
-import tableDataUserReports from "@/variables/tableDataUserReports";
 
 interface Props {
   user: User | null | undefined;

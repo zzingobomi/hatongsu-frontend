@@ -1,10 +1,9 @@
-'use client';
+"use client";
 
-/* eslint-disable */
-import NavLink from '@/components/link/NavLink';
-import { IRoute } from '@/types/types';
-import { usePathname } from 'next/navigation';
-import { PropsWithChildren, useCallback } from 'react';
+import { IRoute } from "@/@types/types";
+import NavLink from "@/components/link/NavLink";
+import { usePathname } from "next/navigation";
+import { PropsWithChildren, useCallback } from "react";
 
 interface SidebarLinksProps extends PropsWithChildren {
   routes: IRoute[];
@@ -25,7 +24,7 @@ export function SidebarLinks(props: SidebarLinksProps) {
   );
   const activeLayout = useCallback(
     (routeName: string) => {
-      return pathname?.includes('/ai');
+      return pathname?.includes("/ai");
     },
     [pathname]
   );
@@ -61,22 +60,22 @@ export function SidebarLinks(props: SidebarLinksProps) {
             <div
               className={`flex w-full max-w-full items-center justify-between rounded-lg py-3 pl-8 ${
                 activeRoute(route.path.toLowerCase())
-                  ? 'bg-zinc-950 font-semibold text-white dark:bg-white dark:text-zinc-950'
-                  : 'font-medium text-zinc-950 dark:text-zinc-400'
+                  ? "bg-zinc-950 font-semibold text-white dark:bg-white dark:text-zinc-950"
+                  : "font-medium text-zinc-950 dark:text-zinc-400"
               }`}
             >
               <NavLink
                 href={route.layout ? route.layout + route.path : route.path}
                 key={key}
-                styles={{ width: '100%' }}
+                styles={{ width: "100%" }}
               >
                 <div className="w-full items-center justify-center">
                   <div className="flex w-full items-center justify-center">
                     <div
                       className={`text mr-3 mt-1.5 ${
                         activeRoute(route.path.toLowerCase())
-                          ? 'font-semibold text-white dark:text-zinc-950'
-                          : 'text-zinc-950 dark:text-white'
+                          ? "font-semibold text-white dark:text-zinc-950"
+                          : "text-zinc-950 dark:text-white"
                       } `}
                     >
                       {route.icon}
@@ -84,8 +83,8 @@ export function SidebarLinks(props: SidebarLinksProps) {
                     <p
                       className={`mr-auto text-sm ${
                         activeRoute(route.path.toLowerCase())
-                          ? 'font-semibold text-white dark:text-zinc-950'
-                          : 'font-medium text-zinc-950 dark:text-zinc-400'
+                          ? "font-semibold text-white dark:text-zinc-950"
+                          : "font-medium text-zinc-950 dark:text-zinc-400"
                       }`}
                     >
                       {route.name}

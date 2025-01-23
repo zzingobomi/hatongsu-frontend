@@ -6,6 +6,7 @@ RUN npm install -g pnpm
 RUN pnpm install --frozen-lockfile
 
 COPY . .
+COPY .env.production .env.production
 RUN pnpm build
 
 FROM node:20-alpine AS production
@@ -24,6 +25,7 @@ COPY --from=builder /app/pnpm-lock.yaml ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/.env.production .env.production
 
 USER nextjs
 

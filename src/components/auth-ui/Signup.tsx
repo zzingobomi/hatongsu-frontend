@@ -27,11 +27,6 @@ export default function SignUp() {
         "base64"
       )}`;
 
-      console.log(
-        "process.env.NEXT_PUBLIC_API_BASE_URL",
-        process.env.NEXT_PUBLIC_API_BASE_URL
-      );
-
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/register`,
         {

@@ -95,6 +95,7 @@ export default function FerrisWheel() {
     (initData: AlbumImage[]) => {
       const center = centerRef.current;
       if (!center) return;
+      if (initData.length < numArms) return;
 
       observersRef.current.forEach((observer) => observer.disconnect());
       observersRef.current = [];
@@ -264,6 +265,11 @@ export default function FerrisWheel() {
 
   return (
     <div className="w-full mx-auto">
+      {(!initData || initData.albumImages.length < numArms) && (
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-black text-xl">
+          최소 {numArms}개의 이미지가 필요합니다. 이미지를 추가해주세요.
+        </div>
+      )}
       <div
         ref={ferrisRef}
         className="absolute mx-auto rounded-full border-white"

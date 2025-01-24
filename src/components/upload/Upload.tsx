@@ -33,6 +33,10 @@ export default function Upload() {
       const formData = new FormData();
       files.forEach((file) => {
         formData.append("files", file);
+        formData.append(
+          "lastModifiedTimestamps[]",
+          file.lastModified.toString()
+        );
       });
 
       const response = await fetch(

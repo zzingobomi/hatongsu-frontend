@@ -1,8 +1,19 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  reactStrictMode: true,
   images: {
-    domains: ["localhost", "practice-zzingo.net", "zzingo5.synology.me:9000"],
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "localhost",
+      },
+      {
+        protocol: "https",
+        hostname: "zzingo5.synology.me",
+        port: "9000",
+      },
+    ],
   },
 };
 

@@ -69,14 +69,12 @@ export default function AlbumImageTable({
 
           return (
             <div className="relative w-16 h-16">
-              {" "}
-              {/* 이미지 크기 지정 */}
               <Image
-                src={imagePath} // 이미지 경로
-                alt="Album Image" // 대체 텍스트
-                layout="fill" // 부모 div 크기에 맞게 채움
-                objectFit="cover" // 이미지 비율 유지
-                className="rounded-md" // 스타일 (예: 둥근 모서리)
+                src={imagePath}
+                alt="Album Image"
+                layout="fill"
+                objectFit="cover"
+                className="rounded-md"
               />
             </div>
           );

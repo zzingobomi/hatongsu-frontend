@@ -70,6 +70,7 @@ export default function AlbumImageTable({
           return (
             <div className="relative w-16 h-16">
               <Image
+                loader={({ src }) => src}
                 src={imagePath}
                 alt="Album Image"
                 layout="fill"

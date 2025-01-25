@@ -10,7 +10,7 @@ import {
   AlbumImagesResponse,
   getAlbumImages,
 } from "@/lib/getAlbumImages";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import { OnChangeFn } from "@tanstack/react-table";
 
 interface Props {
@@ -46,6 +46,10 @@ export default function AlbumView(props: Props) {
         : updaterOrValue
     );
   };
+
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
 
   return (
     <DashboardLayout user={props.user} title="Album Page" description="">

@@ -18,6 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import OauthSignIn from "./OauthSignIn";
 import Separator from "./Separator";
+import Link from "next/link";
 
 const loginSchema = z.object({
   email: z.string().email("유효한 이메일 주소를 입력해주세요"),
@@ -118,12 +119,7 @@ export default function PasswordSignIn() {
         </form>
       </Form>
       <p className="mt-4 text-sm dark:text-white">
-        <button
-          onClick={() => router.replace("/signup")}
-          className="font-medium text-zinc-950 dark:text-white"
-        >
-          계정이 없으신가요? 시작하기
-        </button>
+        <Link href="/signup">계정이 없으신가요? 시작하기</Link>
       </p>
     </>
   );

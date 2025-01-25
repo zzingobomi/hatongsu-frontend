@@ -18,6 +18,7 @@ import {
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 
 const signUpSchema = z
   .object({
@@ -87,12 +88,7 @@ export default function SignUp() {
         <p className="mt-4 dark:text-white">
           이제 로그인 페이지로 이동할 수 있습니다.
         </p>
-        <Button
-          onClick={() => router.replace("/login")}
-          className="mt-6 px-4 py-2"
-        >
-          로그인 페이지로 이동
-        </Button>
+        <Link href="/login">로그인 페이지로 이동</Link>
       </div>
     );
   } else {
@@ -191,12 +187,7 @@ export default function SignUp() {
           </form>
         </Form>
         <p className="mt-4 text-sm dark:text-white">
-          <button
-            onClick={() => router.replace("/login")}
-            className="font-medium text-zinc-950 dark:text-white"
-          >
-            이미 계정이 있으신가요? 로그인
-          </button>
+          <Link href="/login">이미 계정이 있으신가요? 로그인</Link>
         </p>
       </>
     );

@@ -11,20 +11,35 @@ type FileWithPreview = File & {
   preview: string;
 };
 
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+
 export default function Upload() {
   const [files, setFiles] = useState<FileWithPreview[]>([]);
+  const [totalSize, setTotalSize] = useState(0);
+
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
       "image/*": [],
     },
     onDrop: (acceptedFiles) => {
-      setFiles(
-        acceptedFiles.map((file) =>
-          Object.assign(file, {
-            preview: URL.createObjectURL(file),
-          })
-        )
+      const newFiles = acceptedFiles.map((file) =>
+        Object.assign(file, {
+          preview: URL.createObjectURL(file),
+        })
       );
+
+      const newTotalSize = [...newFiles].reduce(
+        (acc, file) => acc + file.size,
+        0
+      );
+
+      if (newTotalSize > MAX_FILE_SIZE) {
+        alert("총 파일 크기가 100MB를 초과했습니다.");
+        return;
+      }
+
+      setFiles([...newFiles]);
+      setTotalSize(newTotalSize);
     },
   });
 
@@ -71,13 +86,9 @@ export default function Upload() {
     uploadMutation.mutate(files);
   };
 
-  const removeFile = (fileName: string) => {
-    setFiles(files.filter((file) => file.name !== fileName));
-  };
-
   const thumbs = files.map((file) => (
     <div
-      className="inline-flex rounded border border-gray-200 mb-2 mr-2 w-24 h-24 p-1 box-border"
+      className="flex justify-center rounded border border-gray-200 mb-2 mr-2 w-24 h-24 p-1 box-border"
       key={file.name}
     >
       <div className="flex min-w-0 overflow-hidden">
@@ -88,28 +99,26 @@ export default function Upload() {
             URL.revokeObjectURL(file.preview);
           }}
           alt={file.name}
-          width={96} // Define width and height to prevent layout shift
+          width={96}
           height={96}
         />
-        <button
-          onClick={() => removeFile(file.name)}
-          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-          type="button"
-        >
-          ×
-        </button>
       </div>
     </div>
   ));
 
-  // Prevent hydration error: execute on the client side only
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return "0 MB";
+    const megabytes = bytes / (1024 * 1024);
+    return `${megabytes.toFixed(1)} MB`;
+  };
+
   useEffect(() => {
     return () => files.forEach((file) => URL.revokeObjectURL(file.preview));
   }, [files]);
 
   return (
     <Card className={"border-zinc-200 p-6 dark:border-zinc-800 w-full"}>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center">
         <section className="container mx-auto p-4">
           <div
             {...getRootProps()}
@@ -122,16 +131,22 @@ export default function Upload() {
           </div>
           <aside className="flex flex-row flex-wrap mt-4">{thumbs}</aside>
         </section>
-
-        <div className="flex justify-end">
-          <Button
-            onClick={handleUpload}
-            disabled={uploadMutation.isPending || files.length === 0}
-            className="w-32"
-          >
-            {uploadMutation.isPending ? "업로드 중..." : "업로드"}
-          </Button>
-        </div>
+      </div>
+      <div className="flex justify-end items-center space-x-2">
+        <span className="text-sm text-gray-600">
+          {formatFileSize(totalSize)} / {formatFileSize(MAX_FILE_SIZE)}
+        </span>
+        <Button
+          onClick={handleUpload}
+          disabled={
+            uploadMutation.isPending ||
+            files.length === 0 ||
+            totalSize > MAX_FILE_SIZE
+          }
+          className="w-32"
+        >
+          {uploadMutation.isPending ? "업로드 중..." : "업로드"}
+        </Button>
       </div>
     </Card>
   );

@@ -22,6 +22,13 @@ export default function Main() {
           <div className="hidden md:flex items-center gap-3">
             <Button
               asChild
+              variant="outline"
+              className="border-2 border-blue-500 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-300 dark:hover:bg-blue-900/20 transition-colors font-semibold"
+            >
+              <Link href="/gallery">전시회장 방문</Link>
+            </Button>
+            <Button
+              asChild
               variant="ghost"
               className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
             >
@@ -29,7 +36,8 @@ export default function Main() {
             </Button>
             <Button
               asChild
-              className="bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-colors"
+              variant="ghost"
+              className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
             >
               <Link href="/signup">시작하기</Link>
             </Button>
@@ -55,6 +63,14 @@ export default function Main() {
               <Button
                 asChild
                 variant="ghost"
+                className="w-full justify-start border-2 border-blue-500 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-300 dark:hover:bg-blue-900/20 transition-colors font-semibold"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Link href="/gallery">전시회장 방문</Link>
+              </Button>
+              <Button
+                asChild
+                variant="ghost"
                 className="w-full justify-start text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                 onClick={() => setIsMenuOpen(false)}
               >
@@ -62,7 +78,8 @@ export default function Main() {
               </Button>
               <Button
                 asChild
-                className="w-full justify-start bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
+                variant="ghost"
+                className="w-full justify-start text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                 onClick={() => setIsMenuOpen(false)}
               >
                 <Link href="/signup">시작하기</Link>

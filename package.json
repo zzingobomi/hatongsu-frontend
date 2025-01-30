@@ -9,6 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@babylonjs/core": "^7.45.0",
+    "@babylonjs/inspector": "^7.45.0",
+    "@babylonjs/loaders": "^7.45.0",
+    "@babylonjs/materials": "^7.45.0",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.4",

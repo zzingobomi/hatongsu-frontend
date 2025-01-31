@@ -41,6 +41,10 @@ export class WorldManager {
       this.engine.resize();
     };
 
+    this.canvas.onclick = () => {
+      this.canvas.requestPointerLock();
+    };
+
     window.addEventListener("keydown", (ev) => {
       if (ev.shiftKey && ev.ctrlKey && ev.altKey && ev.key === "I") {
         if (Inspector.IsVisible) {
@@ -112,6 +116,7 @@ export class WorldManager {
 
   private async initResource() {
     await Managers.Resource.LoadAssets(this.scene);
+
     const worldInstance =
       Managers.Resource.GetAsset(WORLD_NAME).instantiateModelsToScene();
     const env = worldInstance.rootNodes[0] as AbstractMesh;
@@ -120,6 +125,8 @@ export class WorldManager {
       m.receiveShadows = true;
       m.checkCollisions = true;
     });
+
+    Managers.Players.CreateMyPlayer();
   }
 
   private render() {

@@ -5,7 +5,7 @@ import {
   ContainerAssetTask,
   MeshAssetTask,
 } from "@babylonjs/core";
-import { WORLD_NAME } from "../data/resources";
+import { PLAYER_NAME, WORLD_NAME } from "../data/resources";
 
 export class ResourceManager {
   private assetsManager: AssetsManager;
@@ -21,13 +21,20 @@ export class ResourceManager {
   public async LoadAssets(scene: Scene) {
     this.assetsManager = new AssetsManager(scene);
 
-    const environmentModelFile = `${WORLD_NAME}.glb`;
+    const environmentFile = `${WORLD_NAME}.glb`;
+    const playerFile = `${PLAYER_NAME}.glb`;
 
     const assetsToLoad = [
       {
-        name: environmentModelFile.split(".")[0],
-        filename: `${environmentModelFile}`,
-        extension: environmentModelFile.split(".")[1],
+        name: environmentFile.split(".")[0],
+        filename: `${environmentFile}`,
+        extension: environmentFile.split(".")[1],
+        instantiate: true,
+      },
+      {
+        name: playerFile.split(".")[0],
+        filename: `${playerFile}`,
+        extension: playerFile.split(".")[1],
         instantiate: true,
       },
     ];

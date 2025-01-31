@@ -65,6 +65,11 @@ export class WorldManager {
 
     this.scene = new Scene(this.engine);
     this.playerCamera = new PlayerCamera(this.scene);
+
+    this.scene.onBeforeRenderObservable.add(() => {
+      const deltaTime = this.scene.getEngine().getDeltaTime() / 1000;
+      Managers.Players.UpdateAllPlayers(deltaTime);
+    });
   }
 
   private async initEnvironment() {
@@ -125,8 +130,6 @@ export class WorldManager {
       m.receiveShadows = true;
       m.checkCollisions = true;
     });
-
-    Managers.Players.CreateMyPlayer();
   }
 
   private render() {

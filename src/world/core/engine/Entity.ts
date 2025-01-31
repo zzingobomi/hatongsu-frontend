@@ -38,4 +38,6 @@ export abstract class Entity extends TransformNode {
   }
 
   abstract InitMesh(): void;
+
+  abstract Dispose(): void;
 }

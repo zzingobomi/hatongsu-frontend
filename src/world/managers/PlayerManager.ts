@@ -1,8 +1,11 @@
 import { MyCharacter } from "../core/characters/MyCharacter";
+import { RemoteCharacter } from "../core/characters/RemoteCharacter";
 import { Entity } from "../core/engine/Entity";
 import { PLAYER_NAME } from "../data/resources";
+import { IWSAnimationData, IWSTransform } from "../shared/worldserver.type";
 
 export interface PlayerInfo {
+  sessionId: string;
   isMine: boolean;
   character: Entity;
 }
@@ -11,8 +14,66 @@ export class PlayerManager {
   players: PlayerInfo[] = [];
   myPlayer: PlayerInfo;
 
-  public async CreateMyPlayer() {
+  public async CreateMyPlayer(sessionId: string) {
     const myCharacter = new MyCharacter(PLAYER_NAME);
     myCharacter.InitMesh();
+
+    const info: PlayerInfo = {
+      sessionId,
+      isMine: true,
+      character: myCharacter,
+    };
+    this.players.push(info);
+    this.myPlayer = info;
+  }
+
+  public async CreateRemotePlayer(sessionId: string) {
+    const remoteCharacter = new RemoteCharacter(PLAYER_NAME);
+    remoteCharacter.InitMesh();
+
+    const info: PlayerInfo = {
+      sessionId,
+      isMine: false,
+      character: remoteCharacter,
+    };
+    this.players.push(info);
+  }
+
+  public RemovePlayer(sessionId: string) {
+    const removeIndex = this.players.findIndex(
+      (player) => player.sessionId === sessionId
+    );
+    if (removeIndex !== -1) {
+      this.players[removeIndex].character.Dispose();
+      this.players.splice(removeIndex, 1);
+    }
+  }
+
+  public UpdateRemotePlayerTransform(
+    playerId: string,
+    transform: IWSTransform
+  ) {
+    const player = this.players.find((p) => p.sessionId === playerId);
+    if (player && !player.isMine) {
+      const remoteChar = player.character as RemoteCharacter;
+      remoteChar.ApplyNetworkTransform(transform);
+    }
+  }
+
+  public UpdateRemotePlayerAnimation(playerId: string, data: IWSAnimationData) {
+    const player = this.players.find((p) => p.sessionId === playerId);
+    if (player && !player.isMine) {
+      const remoteChar = player.character as RemoteCharacter;
+      remoteChar.ApplyNetworkAnimation(data);
+    }
+  }
+
+  public UpdateAllPlayers(deltaTime: number) {
+    this.players.forEach((player) => {
+      if (!player.isMine) {
+        const remoteChar = player.character as RemoteCharacter;
+        remoteChar.UpdateTransform(deltaTime);
+      }
+    });
   }
 }

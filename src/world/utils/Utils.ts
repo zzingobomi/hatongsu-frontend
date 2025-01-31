@@ -1,4 +1,5 @@
 import { Vector2, Vector3, Vector4, Quaternion } from "@babylonjs/core";
+import { IWSVector3, IWSVector4 } from "../shared/worldserver.type";
 
 export function moveTowardsScalar(
   current: number,
@@ -150,3 +151,22 @@ export function moveTowardsQuaternionToRef(
     Quaternion.SlerpToRef(current, target, maxDistanceDelta, result);
   }
 }
+
+export const toBabylonVector3 = (v: IWSVector3): Vector3 =>
+  new Vector3(v.x, v.y, v.z);
+
+export const fromBabylonVector3 = (v: Vector3): IWSVector3 => ({
+  x: v.x,
+  y: v.y,
+  z: v.z,
+});
+
+export const toBabylonQuaternion = (q: IWSVector4): Quaternion =>
+  new Quaternion(q.x, q.y, q.z, q.w);
+
+export const fromBabylonQuaternion = (q: Quaternion): IWSVector4 => ({
+  x: q.x,
+  y: q.y,
+  z: q.z,
+  w: q.w,
+});

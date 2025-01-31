@@ -20,6 +20,9 @@ importers:
       '@babylonjs/materials':
         specifier: ^7.45.0
         version: 7.45.0(@babylonjs/core@7.45.0)
+      '@geckos.io/client':
+        specifier: ^3.0.1
+        version: 3.0.1
       '@hookform/resolvers':
         specifier: ^3.10.0
         version: 3.10.0(react-hook-form@7.54.2(react@19.0.0))
@@ -371,6 +374,13 @@ packages:
   '@fortawesome/free-solid-svg-icons@6.7.2':
     resolution: {integrity: sha512-GsBrnOzU8uj0LECDfD5zomZJIjrPhIlWU82AHwa2s40FKH+kcxQaBvBo3Z4TxyZHIyX8XTDxsyA33/Vx9eFuQA==}
     engines: {node: '>=6'}
+
+  '@geckos.io/client@3.0.1':
+    resolution: {integrity: sha512-i3ZpKZo6qLiP314cWkxCWKbXvw2vWHAH879Q/6FDFd9SN6Lt0Cz7hP/a2geequGWMUun/npORDtQjjlT+ZVgeA==}
+    engines: {node: '>=18'}
+
+  '@geckos.io/common@3.0.1':
+    resolution: {integrity: sha512-8hED28we0tHGw8Xs2O/EBT/F3P4BJ8N1gfhpLwQLBA2lx0u6/tE0oCYANv2ucBrkQggC3JdqbMygPPsvzsanug==}
 
   '@hookform/resolvers@3.10.0':
     resolution: {integrity: sha512-79Dv+3mDF7i+2ajj7SkypSKHhl1cbln1OGavqrsF7p6mbUv11xpqpacPsGDCTRvCSjEEIez2ef1NveSVL3b0Ag==}
@@ -1515,6 +1525,9 @@ packages:
   '@typescript-eslint/visitor-keys@8.19.1':
     resolution: {integrity: sha512-fzmjU8CHK853V/avYZAvuVut3ZTfwN5YtMaoi+X9Y9MA9keaWNHC3zEQ9zvyX/7Hj+5JkNyK1l7TOR2hevHB6Q==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@yandeu/events@0.0.6':
+    resolution: {integrity: sha512-TDwm4kpur8fqWduqZmrgSc3VLYIOflroVB2JhsM8XxL7KrVzviCXdiEGdUmslGi+ymMl5VsmOlw1+5vjoAsQPg==}
 
   '@yr/monotone-cubic-spline@1.0.3':
     resolution: {integrity: sha512-FQXkOta0XBSUPHndIKON2Y9JeQz5ZeMqLYZVVK93FliNBFm7LNMIZmY6FrMEB9XPcDbE2bekMbZD6kzDkxwYjA==}
@@ -3338,6 +3351,14 @@ snapshots:
     dependencies:
       '@fortawesome/fontawesome-common-types': 6.7.2
 
+  '@geckos.io/client@3.0.1':
+    dependencies:
+      '@geckos.io/common': 3.0.1
+
+  '@geckos.io/common@3.0.1':
+    dependencies:
+      '@yandeu/events': 0.0.6
+
   '@hookform/resolvers@3.10.0(react-hook-form@7.54.2(react@19.0.0))':
     dependencies:
       react-hook-form: 7.54.2(react@19.0.0)
@@ -4474,6 +4495,8 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 8.19.1
       eslint-visitor-keys: 4.2.0
+
+  '@yandeu/events@0.0.6': {}
 
   '@yr/monotone-cubic-spline@1.0.3': {}
 

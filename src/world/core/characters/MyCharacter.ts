@@ -1,25 +1,21 @@
 import {
   AbstractMesh,
-  Color3,
   Matrix,
-  Mesh,
   MeshBuilder,
   Quaternion,
   Ray,
   Scalar,
-  StandardMaterial,
   Vector3,
 } from "@babylonjs/core";
 import { Entity } from "../engine/Entity";
 import { InputController } from "../engine/InputController";
 import { Managers } from "@/world/managers/Managers";
-
-export enum CharacterState {
-  IDLE,
-  WALKING,
-  RUNNING,
-  JUMP,
-}
+import {
+  CharacterState,
+  IWSAnimationData,
+  IWSTransform,
+} from "@/world/shared/worldserver.type";
+import { fromBabylonQuaternion, fromBabylonVector3 } from "@/world/utils/Utils";
 
 export class MyCharacter extends Entity {
   private static readonly GRAVITY: number = -2.8;
@@ -43,15 +39,22 @@ export class MyCharacter extends Entity {
   moveSpeed = 10;
   rotateSpeed = 10;
 
+  // WorldSerer
+  private lastSentPosition: Vector3 = Vector3.Zero();
+  private lastSentRotation: Quaternion = Quaternion.Identity();
+  private lastAnimationState: CharacterState = CharacterState.IDLE;
+  private readonly NETWORK_UPDATE_THRESHOLD = 0.01;
+  private readonly NETWORK_UPDATE_INTERVAL = 100;
+  private lastNetworkUpdateTime: number = 0;
+
   constructor(assetName: string) {
     super(assetName);
 
     this.inputController = new InputController();
-
     this.scene.registerBeforeRender(this.update.bind(this));
   }
 
-  InitMesh() {
+  public InitMesh() {
     const outer = MeshBuilder.CreateBox(
       "myCharacter",
       { width: 2, depth: 1, height: 3 },
@@ -96,7 +99,15 @@ export class MyCharacter extends Entity {
     this.animationGroups[CharacterState.WALKING].weight = 0.0;
     this.animationGroups[CharacterState.RUNNING].weight = 0.0;
     this.animationGroups[CharacterState.JUMP].weight = 0.0;
+
+    // 초기 위치 저장
+    this.lastSentPosition.copyFrom(this.rootMesh.position);
+    if (this.rootMesh.rotationQuaternion) {
+      this.lastSentRotation.copyFrom(this.rootMesh.rotationQuaternion);
+    }
   }
+
+  public Dispose() {}
 
   private setState(state: CharacterState) {
     this.currentState = state;
@@ -114,6 +125,9 @@ export class MyCharacter extends Entity {
     this.inputController.UpdateCamera(this.rootMesh.position);
 
     this.switchAnimation(this.currentState);
+
+    this.sendNetworkUpdate();
+    this.sendAnimationUpdate();
   }
 
   private updateFromControls() {
@@ -205,6 +219,8 @@ export class MyCharacter extends Entity {
     if (this.inputController.jumpKeyDown && this.jumpCount > 0) {
       this.gravity.y = MyCharacter.JUMP_FORCE;
       this.jumpCount--;
+
+      this.forceNetworkUpdate();
     }
   }
 
@@ -320,5 +336,57 @@ export class MyCharacter extends Entity {
       }
     }
     return false;
+  }
+
+  private sendNetworkUpdate() {
+    const currentTime = Date.now();
+    const positionChanged =
+      Vector3.DistanceSquared(this.rootMesh.position, this.lastSentPosition) >
+      this.NETWORK_UPDATE_THRESHOLD ** 2;
+
+    const rotationChanged =
+      this.rootMesh.rotationQuaternion &&
+      !this.rootMesh.rotationQuaternion.equalsWithEpsilon(
+        this.lastSentRotation,
+        this.NETWORK_UPDATE_THRESHOLD
+      );
+
+    if (
+      (positionChanged || rotationChanged) &&
+      currentTime - this.lastNetworkUpdateTime > this.NETWORK_UPDATE_INTERVAL
+    ) {
+      const playerTransform: IWSTransform = {
+        position: fromBabylonVector3(this.rootMesh.position),
+        rotation: fromBabylonQuaternion(
+          this.rootMesh.rotationQuaternion || Quaternion.Identity()
+        ),
+      };
+
+      Managers.WorldServer.SendPlayerUpdate(playerTransform);
+
+      this.lastSentPosition.copyFrom(this.rootMesh.position);
+      if (this.rootMesh.rotationQuaternion) {
+        this.lastSentRotation.copyFrom(this.rootMesh.rotationQuaternion);
+      }
+      this.lastNetworkUpdateTime = currentTime;
+    }
+  }
+
+  private sendAnimationUpdate() {
+    if (this.currentState !== this.lastAnimationState) {
+      const animationData: IWSAnimationData = {
+        playerId: Managers.WorldServer.GetPlayerId(),
+        state: this.currentState,
+      };
+
+      Managers.WorldServer.SendPlayerAnimation(animationData);
+      this.lastAnimationState = this.currentState;
+    }
+  }
+
+  private forceNetworkUpdate() {
+    this.lastNetworkUpdateTime = 0;
+    this.sendNetworkUpdate();
+    this.sendAnimationUpdate();
   }
 }

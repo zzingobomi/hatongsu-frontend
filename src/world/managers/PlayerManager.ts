@@ -14,9 +14,10 @@ export class PlayerManager {
   players: PlayerInfo[] = [];
   myPlayer: PlayerInfo;
 
-  public async CreateMyPlayer(sessionId: string) {
+  public async CreateMyPlayer(sessionId: string, transform: IWSTransform) {
     const myCharacter = new MyCharacter(PLAYER_NAME);
     myCharacter.InitMesh();
+    myCharacter.InitTransform(transform);
 
     const info: PlayerInfo = {
       sessionId,
@@ -27,9 +28,10 @@ export class PlayerManager {
     this.myPlayer = info;
   }
 
-  public async CreateRemotePlayer(sessionId: string) {
+  public async CreateRemotePlayer(sessionId: string, transform: IWSTransform) {
     const remoteCharacter = new RemoteCharacter(PLAYER_NAME);
     remoteCharacter.InitMesh();
+    remoteCharacter.InitTransform(transform);
 
     const info: PlayerInfo = {
       sessionId,
@@ -66,14 +68,5 @@ export class PlayerManager {
       const remoteChar = player.character as RemoteCharacter;
       remoteChar.ApplyNetworkAnimation(data);
     }
-  }
-
-  public UpdateAllPlayers(deltaTime: number) {
-    this.players.forEach((player) => {
-      if (!player.isMine) {
-        const remoteChar = player.character as RemoteCharacter;
-        remoteChar.UpdateTransform(deltaTime);
-      }
-    });
   }
 }

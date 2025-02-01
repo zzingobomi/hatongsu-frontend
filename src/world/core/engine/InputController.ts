@@ -45,7 +45,7 @@ export class InputController {
   jumpKeyDown: boolean = false;
   runKeyDown: boolean = false;
 
-  mouseX: number = 0;
+  mouseX: number = 90;
   mouseY: number = 0;
 
   deltaTime: number;

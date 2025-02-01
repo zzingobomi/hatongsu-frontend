@@ -58,6 +58,10 @@ export class WorldManager {
     this.render();
   }
 
+  public GetShadowGenerator(): ShadowGenerator {
+    return this.shadowGenerator;
+  }
+
   private async initScene() {
     this.engine = new Engine(this.canvas, true, {
       adaptToDeviceRatio: true,
@@ -65,11 +69,6 @@ export class WorldManager {
 
     this.scene = new Scene(this.engine);
     this.playerCamera = new PlayerCamera(this.scene);
-
-    this.scene.onBeforeRenderObservable.add(() => {
-      const deltaTime = this.scene.getEngine().getDeltaTime() / 1000;
-      Managers.Players.UpdateAllPlayers(deltaTime);
-    });
   }
 
   private async initEnvironment() {

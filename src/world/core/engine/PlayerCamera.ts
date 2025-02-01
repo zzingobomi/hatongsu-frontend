@@ -21,7 +21,7 @@ export class PlayerCamera {
   private init() {
     this.camRoot = new TransformNode("root");
     this.camRoot.position = new Vector3(0, 0, 0);
-    this.camRoot.rotation = new Vector3(0, Math.PI, 0);
+    this.camRoot.rotation = new Vector3(0, 0, 0);
 
     this.yTilt = new TransformNode("ytilt");
     this.yTilt.rotation = PlayerCamera.ORIGINAL_TILT;

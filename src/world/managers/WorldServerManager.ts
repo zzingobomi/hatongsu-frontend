@@ -33,7 +33,6 @@ export class WorldServerManager {
         } else {
           if (this.channel.id) {
             this.playerId = this.channel.id.toString();
-            Managers.Players.CreateMyPlayer(this.playerId);
           }
           resolve();
         }
@@ -54,6 +53,10 @@ export class WorldServerManager {
   }
 
   private registerEventHandlers() {
+    window.addEventListener("beforeunload", () => {
+      this.channel.close();
+    });
+
     this.channel.on(
       WSMessageType.SERVER_EXISTING_PLAYERS,
       this.handleExistingPlayers.bind(this)
@@ -80,7 +83,7 @@ export class WorldServerManager {
     const players = data as IWSPlayerData[];
     players.forEach((player) => {
       if (player.playerId !== this.channel.id) {
-        Managers.Players.CreateRemotePlayer(player.playerId);
+        Managers.Players.CreateRemotePlayer(player.playerId, player.transform);
       }
     });
   }
@@ -88,7 +91,9 @@ export class WorldServerManager {
   private handleNewPlayer(data: Data) {
     const player = data as IWSPlayerData;
     if (player.playerId !== this.channel.id) {
-      Managers.Players.CreateRemotePlayer(player.playerId);
+      Managers.Players.CreateRemotePlayer(player.playerId, player.transform);
+    } else {
+      Managers.Players.CreateMyPlayer(player.playerId, player.transform);
     }
   }
 

@@ -1,13 +1,4 @@
-import {
-  AbstractMesh,
-  Matrix,
-  MeshBuilder,
-  Quaternion,
-  Ray,
-  Scalar,
-  Vector3,
-} from "@babylonjs/core";
-import { Entity } from "../engine/Entity";
+import { AbstractMesh, Quaternion, Ray, Vector3 } from "@babylonjs/core";
 import { InputController } from "../engine/InputController";
 import { Managers } from "@/world/managers/Managers";
 import {
@@ -16,28 +7,24 @@ import {
   IWSTransform,
 } from "@/world/shared/worldserver.type";
 import { fromBabylonQuaternion, fromBabylonVector3 } from "@/world/utils/Utils";
+import { CharacterEntity } from "./CharacterEntity";
 
-export class MyCharacter extends Entity {
+export class MyCharacter extends CharacterEntity {
   private static readonly GRAVITY: number = -2.8;
   private static readonly JUMP_FORCE: number = 0.8;
 
-  inputController: InputController;
+  private inputController: InputController;
 
-  moveDirection: Vector3 = new Vector3();
-  inputAmt: number;
+  private moveDirection: Vector3 = new Vector3();
+  private inputAmt: number;
 
-  gravity: Vector3 = new Vector3();
-  lastGroundPos: Vector3 = Vector3.Zero();
-  grounded: boolean;
-  jumpCount: number = 1;
+  private gravity: Vector3 = new Vector3();
+  private lastGroundPos: Vector3 = Vector3.Zero();
+  private grounded: boolean;
+  private jumpCount: number = 1;
 
-  currentState: CharacterState = CharacterState.IDLE;
-
-  deltaTime: number = 0;
-  elapsedTime: number = 0;
-
-  moveSpeed = 10;
-  rotateSpeed = 10;
+  private moveSpeed = 5;
+  private rotateSpeed = 5;
 
   // WorldSerer
   private lastSentPosition: Vector3 = Vector3.Zero();
@@ -54,67 +41,8 @@ export class MyCharacter extends Entity {
     this.scene.registerBeforeRender(this.update.bind(this));
   }
 
-  public InitMesh() {
-    const outer = MeshBuilder.CreateBox(
-      "myCharacter",
-      { width: 2, depth: 1, height: 3 },
-      this.scene
-    );
-    outer.isVisible = false;
-    outer.isPickable = false;
-    outer.checkCollisions = true;
-
-    // Debug
-    // const material = new StandardMaterial("charMaterial", this.scene);
-    // material.alpha = 0.3;
-    // material.diffuseColor = new Color3(0.5, 0.5, 1);
-    // material.emissiveColor = new Color3(0.2, 0.2, 0.5);
-    // material.backFaceCulling = false;
-
-    // outer.material = material;
-
-    outer.bakeTransformIntoVertices(Matrix.Translation(0, 1.5, 0));
-
-    outer.ellipsoid = new Vector3(1, 1.5, 1);
-    outer.ellipsoidOffset = new Vector3(0, 1.5, 0);
-
-    outer.rotationQuaternion = new Quaternion(0, 1, 0, 0);
-
-    this.rootMesh = outer;
-    this.rootMesh.parent = this;
-
-    const mesh = this.rootNodes[0] as AbstractMesh;
-    mesh.parent = this.rootMesh;
-    mesh.isPickable = false;
-    mesh.getChildMeshes().forEach((m) => {
-      m.isPickable = false;
-    });
-
-    this.mesh = mesh;
-
-    for (const animationGroup of this.animationGroups) {
-      animationGroup.play(true);
-    }
-    this.animationGroups[CharacterState.IDLE].weight = 1.0;
-    this.animationGroups[CharacterState.WALKING].weight = 0.0;
-    this.animationGroups[CharacterState.RUNNING].weight = 0.0;
-    this.animationGroups[CharacterState.JUMP].weight = 0.0;
-
-    // 초기 위치 저장
-    this.lastSentPosition.copyFrom(this.rootMesh.position);
-    if (this.rootMesh.rotationQuaternion) {
-      this.lastSentRotation.copyFrom(this.rootMesh.rotationQuaternion);
-    }
-  }
-
-  public Dispose() {}
-
-  private setState(state: CharacterState) {
-    this.currentState = state;
-  }
-
-  private update() {
-    this.deltaTime = this.engine.getDeltaTime();
+  protected update() {
+    this.deltaTime = this.engine.getDeltaTime() / 1000;
     this.setState(CharacterState.IDLE);
 
     this.inputController.UpdateInput();
@@ -156,7 +84,7 @@ export class MyCharacter extends Entity {
     }
 
     this.moveDirection = this.moveDirection.scaleInPlace(
-      this.inputAmt * this.moveSpeed * (this.deltaTime / 1000)
+      this.inputAmt * this.moveSpeed * this.deltaTime
     );
 
     const input = new Vector3(
@@ -181,7 +109,7 @@ export class MyCharacter extends Entity {
       this.rootMesh.rotationQuaternion = Quaternion.Slerp(
         this.rootMesh.rotationQuaternion,
         targ,
-        this.rotateSpeed * (this.deltaTime / 1000.0)
+        this.rotateSpeed * this.deltaTime
       );
     }
   }
@@ -194,7 +122,7 @@ export class MyCharacter extends Entity {
         this.grounded = true;
       } else {
         this.gravity = this.gravity.addInPlace(
-          Vector3.Up().scale((this.deltaTime / 1000.0) * MyCharacter.GRAVITY)
+          Vector3.Up().scale(this.deltaTime * MyCharacter.GRAVITY)
         );
         this.grounded = false;
       }
@@ -221,21 +149,6 @@ export class MyCharacter extends Entity {
       this.jumpCount--;
 
       this.forceNetworkUpdate();
-    }
-  }
-
-  private switchAnimation(state: CharacterState) {
-    for (let i = 0; i < this.animationGroups.length; i++) {
-      if (state === i) {
-        this.animationGroups[i].weight += 0.005 * this.deltaTime;
-      } else {
-        this.animationGroups[i].weight -= 0.005 * this.deltaTime;
-      }
-      this.animationGroups[i].weight = Scalar.Clamp(
-        this.animationGroups[i].weight,
-        0.0,
-        1.0
-      );
     }
   }
 

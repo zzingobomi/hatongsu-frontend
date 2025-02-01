@@ -12,15 +12,15 @@ import {
 } from "@babylonjs/core";
 
 export abstract class Entity extends TransformNode {
-  engine: Engine;
-  scene: Scene;
+  protected engine: Engine;
+  protected scene: Scene;
 
-  instanceModel: InstantiatedEntries;
-  rootMesh: Mesh;
-  mesh: AbstractMesh;
-  rootNodes: Node[];
-  skeletons: Skeleton[];
-  animationGroups: AnimationGroup[];
+  protected instanceModel: InstantiatedEntries;
+  protected rootMesh: Mesh;
+  protected mesh: AbstractMesh;
+  protected rootNodes: Node[];
+  protected skeletons: Skeleton[];
+  protected animationGroups: AnimationGroup[];
 
   constructor(assetName: string) {
     super(assetName, Managers.World.scene);

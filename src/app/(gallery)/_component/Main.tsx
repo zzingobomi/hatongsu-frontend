@@ -7,13 +7,10 @@ export default function Main() {
   const worldRef = useRef<World>(null);
 
   useEffect(() => {
-    worldRef.current = new World();
-
-    return () => {
-      if (worldRef.current) {
-        worldRef.current.clear();
-      }
-    };
+    (async () => {
+      const { World } = await import("@/world");
+      worldRef.current = new World();
+    })();
   }, []);
 
   return (

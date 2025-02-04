@@ -2,6 +2,7 @@ import { WorldManager } from "./WorldManager";
 import { ResourceManager } from "./ResourceManager";
 import { PlayerManager } from "./PlayerManager";
 import { WorldServerManager } from "./WorldServerManager";
+import { EventServerManager } from "./EventServerManager";
 
 export class Managers {
   private static s_instance: Managers;
@@ -14,6 +15,7 @@ export class Managers {
   _resource: ResourceManager = new ResourceManager();
   _players: PlayerManager = new PlayerManager();
   _worldServer: WorldServerManager = new WorldServerManager();
+  _eventServer: EventServerManager = new EventServerManager();
 
   static get World(): WorldManager {
     return Managers.Instance._world;
@@ -27,6 +29,9 @@ export class Managers {
   static get WorldServer(): WorldServerManager {
     return Managers.Instance._worldServer;
   }
+  static get EventServer(): EventServerManager {
+    return Managers.Instance._eventServer;
+  }
 
   static async Init() {
     if (!this.s_instance) {
@@ -34,6 +39,7 @@ export class Managers {
 
       await this.s_instance._world.Init();
       await this.s_instance._worldServer.Init();
+      await this.s_instance._eventServer.Init();
     }
   }
 

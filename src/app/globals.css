@@ -99,4 +99,14 @@ body {
   .auth-modal-content {
     @apply p-9 text-2xl font-bold flex justify-center items-center max-h-[600px] overflow-y-scroll scrollbar-hide;
   }
+
+  .lobby-modal {
+    @apply w-screen h-screen flex justify-center items-center fixed bg-black bg-opacity-40 dark:bg-opacity-50 top-0 left-0 z-50;
+  }
+  .lobby-modal-wrapper {
+    @apply relative bg-white dark:bg-gray-800 rounded-lg flex flex-col w-[90%] md:w-[60%] lg:w-auto;
+  }
+  .lobby-modal-content {
+    @apply p-9 text-2xl font-bold flex justify-center items-center max-h-[600px] overflow-y-scroll scrollbar-hide;
+  }
 }

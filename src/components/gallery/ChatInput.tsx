@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
-import { cn } from "@/lib/utils";
 import { useChatStore } from "@/app/stores/ChatStore";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { cn } from "@/lib/utils";
 
 export function ChatInput() {
   const { register, handleSubmit, reset } = useForm<{ message: string }>();

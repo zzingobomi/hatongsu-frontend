@@ -5,11 +5,22 @@ import {
   ContainerAssetTask,
   MeshAssetTask,
 } from "@babylonjs/core";
-import { PLAYER_NAME, WORLD_NAME } from "../data/resources";
+import { PLAYER_NAME, WORLD_NAME } from "../data/const";
+import { IManager } from "./Managers";
 
-export class ResourceManager {
+export class ResourceManager implements IManager {
   private assetsManager: AssetsManager;
   private loadedAssets: { [key: string]: AssetContainer } = {};
+
+  public async Init() {}
+
+  public async Dispose() {
+    for (const key in this.loadedAssets) {
+      this.loadedAssets[key].dispose();
+    }
+    this.loadedAssets = {};
+  }
+
   public GetLoadedAssets() {
     return this.loadedAssets;
   }

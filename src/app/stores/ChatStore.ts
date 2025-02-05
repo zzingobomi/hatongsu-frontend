@@ -1,10 +1,12 @@
 import { create } from "zustand";
 import { ESChatMessage } from "@/world/shared/eventserver.type";
 
+type ESChatMessageWithMine = ESChatMessage & { isMine: boolean };
+
 interface ChatState {
   // Chat messages
-  messages: ESChatMessage[];
-  addMessage: (message: ESChatMessage) => void;
+  messages: ESChatMessageWithMine[];
+  addMessage: (message: ESChatMessageWithMine) => void;
   clearMessages: () => void;
 
   // Chat state
@@ -15,7 +17,7 @@ interface ChatState {
   resetUnread: () => void;
 
   // Send message
-  pendingMessage: string;
+  myChatMessage: string;
   sendMessage: (message: string) => void;
 }
 
@@ -45,6 +47,6 @@ export const useChatStore = create<ChatState>((set) => ({
     })),
   resetUnread: () => set({ unreadCount: 0 }),
 
-  pendingMessage: "",
-  sendMessage: (message) => set({ pendingMessage: message }),
+  myChatMessage: "",
+  sendMessage: (message) => set({ myChatMessage: message }),
 }));

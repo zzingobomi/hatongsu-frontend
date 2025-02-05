@@ -4,7 +4,9 @@ import { NextResponse } from "next/server";
 export async function middleware() {
   const session = await auth();
   if (!session) {
-    return NextResponse.redirect("http://localhost:3000/login");
+    return NextResponse.redirect(
+      `${process.env.NEXT_PUBLIC_FRONTEND_URL}/login`
+    );
   }
 }
 

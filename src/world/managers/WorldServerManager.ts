@@ -5,9 +5,9 @@ import {
   IWSTransform,
   WSMessageType,
 } from "../shared/worldserver.type";
-import { Managers } from "./Managers";
+import { IManager, Managers } from "./Managers";
 
-export class WorldServerManager {
+export class WorldServerManager implements IManager {
   private channel: ClientChannel;
   private playerId: string;
 
@@ -23,6 +23,10 @@ export class WorldServerManager {
     } catch (error) {
       console.error("Error initializing WorldServerManager", error);
     }
+  }
+
+  public async Dispose() {
+    this.channel.close();
   }
 
   private connectToServer(): Promise<void> {

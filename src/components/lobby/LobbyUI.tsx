@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { z } from "zod";
+import Separator from "../auth-ui/Separator";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
-import React from "react";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,77 +13,49 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
-import OauthSignIn from "./OauthSignIn";
-import Separator from "./Separator";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { usePlayerStore } from "@/app/stores/PlayerStore";
 
-const loginSchema = z.object({
-  email: z.string().trim().email("유효한 이메일 주소를 입력해주세요"),
-  password: z.string().trim().min(1, "비밀번호를 입력해주세요"),
+const lobbySchema = z.object({
+  nickname: z.string().trim().min(1, "닉네임을 입력해주세요"),
 });
 
-export default function PasswordSignIn() {
+export default function LobbyUI() {
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<z.infer<typeof lobbySchema>>({
+    resolver: zodResolver(lobbySchema),
     defaultValues: {
-      email: "",
-      password: "",
+      nickname: "",
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
-    try {
-      await signIn("credentials", {
-        username: data.email,
-        password: data.password,
-        redirect: false,
-      });
-
-      router.replace("/dashboard/main");
-    } catch (err) {
-      console.error(err);
-    }
+  const onSubmit = async (data: z.infer<typeof lobbySchema>) => {
+    usePlayerStore.getState().setNickname(data.nickname);
+    router.push("/gallery");
   };
 
   return (
-    <>
+    <div className="my-auto mb-auto flex flex-col w-full lg:mt-[16px] lg:min-w-[420px]">
       <p className="text-[32px] font-bold text-zinc-950 dark:text-white">
-        Login
+        Lobby
       </p>
-      <OauthSignIn />
       <Separator />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
-            name="email"
+            name="nickname"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>Nickname</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="name@example.com"
-                    type="email"
+                    placeholder="닉네임을 입력해주세요"
+                    type="text"
                     {...field}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="Password" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -113,14 +85,11 @@ export default function PasswordSignIn() {
                 ></path>
               </svg>
             ) : (
-              "Sign in"
+              "입장하기"
             )}
           </Button>
         </form>
       </Form>
-      <p className="mt-4 text-sm dark:text-white">
-        <Link href="/signup">계정이 없으신가요? 시작하기</Link>
-      </p>
-    </>
+    </div>
   );
 }

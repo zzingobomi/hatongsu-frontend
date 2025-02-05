@@ -1,8 +1,9 @@
 import { MyCharacter } from "../core/characters/MyCharacter";
 import { RemoteCharacter } from "../core/characters/RemoteCharacter";
 import { Entity } from "../core/engine/Entity";
-import { PLAYER_NAME } from "../data/resources";
+import { PLAYER_NAME } from "../data/const";
 import { IWSAnimationData, IWSTransform } from "../shared/worldserver.type";
+import { IManager } from "./Managers";
 
 export interface PlayerInfo {
   sessionId: string;
@@ -10,9 +11,18 @@ export interface PlayerInfo {
   character: Entity;
 }
 
-export class PlayerManager {
+export class PlayerManager implements IManager {
   players: PlayerInfo[] = [];
   myPlayer: PlayerInfo;
+
+  public async Init() {}
+
+  public async Dispose() {
+    this.players.forEach((player) => {
+      player.character.Dispose();
+    });
+    this.players = [];
+  }
 
   public async CreateMyPlayer(sessionId: string, transform: IWSTransform) {
     const myCharacter = new MyCharacter(PLAYER_NAME);

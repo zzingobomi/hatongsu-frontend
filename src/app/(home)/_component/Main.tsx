@@ -25,7 +25,7 @@ export default function Main() {
               variant="outline"
               className="border-2 border-blue-500 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-300 dark:hover:bg-blue-900/20 transition-colors font-semibold"
             >
-              <Link href="/gallery">전시회장 방문</Link>
+              <Link href="/lobby">전시회장 방문</Link>
             </Button>
             <Button
               asChild
@@ -66,7 +66,7 @@ export default function Main() {
                 className="w-full justify-start border-2 border-blue-500 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-300 dark:hover:bg-blue-900/20 transition-colors font-semibold"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <Link href="/gallery">전시회장 방문</Link>
+                <Link href="/lobby">전시회장 방문</Link>
               </Button>
               <Button
                 asChild

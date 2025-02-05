@@ -2,17 +2,20 @@ import * as Colyseus from "colyseus.js";
 import {
   ESChatMessage,
   ESGalleryRoomName,
-  ESJoinMessage,
-  ESLeaveMessage,
+  ESJoinOptions,
   ESMessageType,
 } from "../shared/eventserver.type";
 import { useChatStore } from "@/app/stores/ChatStore";
+import { usePlayerStore } from "@/app/stores/PlayerStore";
+import { PlayerSchema } from "../schema/PlayerSchema";
+import { GalleryRoomState } from "../schema/GalleryRoomState";
+import { SERVER_NICKNAME } from "../data/const";
 
 export class EventServerManager {
   private client: Colyseus.Client;
-  private room: Colyseus.Room;
+  private room: Colyseus.Room<GalleryRoomState>;
   private sessionId: string;
-  private unsubscribePendingMessage: () => void;
+  private unsubscribeMyChatMessage: () => void;
 
   public async Init() {
     try {
@@ -22,20 +25,28 @@ export class EventServerManager {
 
       await this.joinToServer();
       this.registerEventHandlers();
-      this.subscribeToPendingMessage();
+      this.subscribeMyChatMessage();
     } catch (error) {
       console.error("Error initializing EventServerManager", error);
     }
   }
 
+  public async Dispose() {
+    this.unsubscribeMyChatMessage();
+    await this.room.leave();
+  }
+
   private joinToServer(): Promise<void> {
     return new Promise((resolve, reject) => {
+      const nickname = usePlayerStore.getState().nickname;
+      const options: ESJoinOptions = { nickname };
+
       this.client
-        .join(ESGalleryRoomName)
+        .join(ESGalleryRoomName, options)
         .then((room) => {
           console.log("joined room", room);
           this.sessionId = room.sessionId;
-          this.room = room;
+          this.room = room as Colyseus.Room<GalleryRoomState>;
           resolve();
         })
         .catch((error) => {
@@ -55,40 +66,51 @@ export class EventServerManager {
 
   private registerEventHandlers() {
     this.room.onMessage(
-      ESMessageType.SERVER_JOIN_MESSAGE,
-      this.handleJoinMessage.bind(this)
-    );
-    this.room.onMessage(
-      ESMessageType.SERVER_LEAVE_MESSAGE,
-      this.handleLeaveMessage.bind(this)
-    );
-    this.room.onMessage(
       ESMessageType.SERVER_CHAT_MESSAGE,
       this.handleChatMessage.bind(this)
     );
-  }
 
-  private handleJoinMessage(message: ESJoinMessage) {
-    console.log("join message received", message);
-  }
+    this.room.state.players.onAdd((player: PlayerSchema, sessionId: string) => {
+      if (sessionId !== this.sessionId) {
+        useChatStore.getState().addMessage({
+          sessionId,
+          nickname: SERVER_NICKNAME,
+          message: `${player.nickname} 님이 갤러리에 입장하셨습니다.`,
+          timestamp: Date.now(),
+          isMine: false,
+        });
+      }
+    });
 
-  private handleLeaveMessage(message: ESLeaveMessage) {
-    console.log("leave message received", message);
+    this.room.state.players.onRemove(
+      (player: PlayerSchema, sessionId: string) => {
+        if (sessionId !== this.sessionId) {
+          useChatStore.getState().addMessage({
+            sessionId,
+            nickname: SERVER_NICKNAME,
+            message: `${player.nickname} 님이 갤러리를 떠나셨습니다.`,
+            timestamp: Date.now(),
+            isMine: false,
+          });
+        }
+      }
+    );
   }
 
   private handleChatMessage(message: ESChatMessage) {
     console.log("Chat message received", message);
-    useChatStore.getState().addMessage(message);
+    const isMine = message.sessionId === this.sessionId;
+    useChatStore.getState().addMessage({ ...message, isMine });
   }
 
-  private subscribeToPendingMessage() {
-    this.unsubscribePendingMessage = useChatStore.subscribe(
+  private subscribeMyChatMessage() {
+    this.unsubscribeMyChatMessage = useChatStore.subscribe(
       (state, previousState) => {
         if (
-          state.pendingMessage &&
-          state.pendingMessage !== previousState.pendingMessage
+          state.myChatMessage &&
+          state.myChatMessage !== previousState.myChatMessage
         ) {
-          this.sendChatMessage(state.pendingMessage);
+          this.sendChatMessage(state.myChatMessage);
           useChatStore.getState().sendMessage("");
         }
       }

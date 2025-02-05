@@ -16,10 +16,10 @@ import {
 } from "@babylonjs/core";
 import { Inspector } from "@babylonjs/inspector";
 import { PlayerCamera } from "../core/engine/PlayerCamera";
-import { Managers } from "./Managers";
-import { WORLD_NAME } from "../data/resources";
+import { IManager, Managers } from "./Managers";
+import { WORLD_NAME } from "../data/const";
 
-export class WorldManager {
+export class WorldManager implements IManager {
   // babylon
   public canvas: HTMLCanvasElement;
   public engine: Engine;
@@ -56,6 +56,12 @@ export class WorldManager {
     });
 
     this.render();
+  }
+
+  public async Dispose() {
+    this.engine.stopRenderLoop();
+    this.engine.dispose();
+    this.scene.dispose();
   }
 
   public GetShadowGenerator(): ShadowGenerator {

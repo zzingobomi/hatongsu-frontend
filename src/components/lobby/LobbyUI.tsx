@@ -15,7 +15,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { usePlayerStore } from "@/app/stores/PlayerStore";
+import { useEffect } from "react";
 
 const lobbySchema = z.object({
   nickname: z.string().trim().min(1, "닉네임을 입력해주세요"),
@@ -32,9 +32,16 @@ export default function LobbyUI() {
   });
 
   const onSubmit = async (data: z.infer<typeof lobbySchema>) => {
-    usePlayerStore.getState().setNickname(data.nickname);
+    localStorage.setItem("nickname", data.nickname);
     router.push("/gallery");
   };
+
+  useEffect(() => {
+    const savedNickname = localStorage.getItem("nickname");
+    if (savedNickname) {
+      form.setValue("nickname", savedNickname);
+    }
+  }, [form]);
 
   return (
     <div className="my-auto mb-auto flex flex-col w-full lg:mt-[16px] lg:min-w-[420px]">

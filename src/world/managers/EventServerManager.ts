@@ -6,7 +6,6 @@ import {
   ESMessageType,
 } from "../shared/eventserver.type";
 import { useChatStore } from "@/app/stores/ChatStore";
-import { usePlayerStore } from "@/app/stores/PlayerStore";
 import { PlayerSchema } from "../schema/PlayerSchema";
 import { GalleryRoomState } from "../schema/GalleryRoomState";
 import { SERVER_NICKNAME } from "../data/const";
@@ -38,7 +37,11 @@ export class EventServerManager {
 
   private joinToServer(): Promise<void> {
     return new Promise((resolve, reject) => {
-      const nickname = usePlayerStore.getState().nickname;
+      const nickname = localStorage.getItem("nickname");
+      if (!nickname) {
+        reject("Nickname is not set");
+        return;
+      }
       const options: ESJoinOptions = { nickname };
 
       this.client

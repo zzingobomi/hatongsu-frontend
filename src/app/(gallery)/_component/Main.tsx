@@ -2,12 +2,11 @@
 
 import { World } from "@/world";
 import { useEffect, useRef } from "react";
-import { usePlayerStore } from "@/app/stores/PlayerStore";
 import { useRouter } from "next/navigation";
 import ChatView from "@/components/gallery/ChatView";
 
 export default function Main() {
-  const nickname = usePlayerStore((state) => state.nickname);
+  const nickname = localStorage.getItem("nickname");
   const router = useRouter();
 
   if (!nickname) {

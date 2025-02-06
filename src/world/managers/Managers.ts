@@ -3,6 +3,7 @@ import { ResourceManager } from "./ResourceManager";
 import { PlayerManager } from "./PlayerManager";
 import { WorldServerManager } from "./WorldServerManager";
 import { EventServerManager } from "./EventServerManager";
+import { GallerySpotManager } from "./GallerySpotManager";
 
 export interface IManager {
   Init(): Promise<void>;
@@ -18,6 +19,7 @@ export class Managers {
 
   _world: WorldManager = new WorldManager();
   _resource: ResourceManager = new ResourceManager();
+  _gallerySpot: GallerySpotManager = new GallerySpotManager();
   _players: PlayerManager = new PlayerManager();
   _worldServer: WorldServerManager = new WorldServerManager();
   _eventServer: EventServerManager = new EventServerManager();
@@ -27,6 +29,9 @@ export class Managers {
   }
   static get Resource(): ResourceManager {
     return Managers.Instance._resource;
+  }
+  static get GallerySpot(): GallerySpotManager {
+    return Managers.Instance._gallerySpot;
   }
   static get Players(): PlayerManager {
     return Managers.Instance._players;
@@ -44,6 +49,7 @@ export class Managers {
 
       await this.s_instance._world.Init();
       await this.s_instance._resource.Init();
+      await this.s_instance._gallerySpot.Init();
       await this.s_instance._players.Init();
       await this.s_instance._worldServer.Init();
       await this.s_instance._eventServer.Init();
@@ -54,6 +60,7 @@ export class Managers {
     if (this.s_instance) {
       await this.s_instance._world.Dispose();
       await this.s_instance._resource.Dispose();
+      await this.s_instance._gallerySpot.Dispose();
       await this.s_instance._players.Dispose();
       await this.s_instance._worldServer.Dispose();
       await this.s_instance._eventServer.Dispose();

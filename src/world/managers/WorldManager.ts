@@ -13,6 +13,10 @@ import {
   ShadowGenerator,
   AbstractMesh,
   AxesViewer,
+  StandardMaterial,
+  Texture,
+  Mesh,
+  Vector2,
 } from "@babylonjs/core";
 import { Inspector } from "@babylonjs/inspector";
 import { PlayerCamera } from "../core/engine/PlayerCamera";
@@ -36,6 +40,7 @@ export class WorldManager implements IManager {
     await this.initScene();
     await this.initEnvironment();
     await this.initResource();
+    this.initGallerySpot();
 
     window.onresize = () => {
       this.engine.resize();
@@ -127,14 +132,35 @@ export class WorldManager implements IManager {
   private async initResource() {
     await Managers.Resource.LoadAssets(this.scene);
 
-    const worldInstance =
-      Managers.Resource.GetAsset(WORLD_NAME).instantiateModelsToScene();
+    const worldInstance = Managers.Resource.GetAsset(
+      WORLD_NAME
+    ).instantiateModelsToScene((sourceName) => sourceName);
     const env = worldInstance.rootNodes[0] as AbstractMesh;
     env.getChildMeshes().forEach((m) => {
       this.shadowGenerator.addShadowCaster(m);
       m.receiveShadows = true;
       m.checkCollisions = true;
     });
+  }
+
+  private async initGallerySpot() {
+    await Managers.GallerySpot.LoadGallerySpot();
+
+    const images = Managers.GallerySpot.GetImages();
+    for (const [index, image] of images.entries()) {
+      try {
+        const meshName = `picture_${index + 1}`;
+        const pictureMesh = this.scene.meshes.find(
+          (mesh) => mesh.name === meshName
+        );
+        Managers.GallerySpot.AssignMaterialToGallerySpot(
+          pictureMesh as Mesh,
+          image
+        );
+      } catch (error) {
+        console.error(`이미지 ${index + 1} 오류`);
+      }
+    }
   }
 
   private render() {

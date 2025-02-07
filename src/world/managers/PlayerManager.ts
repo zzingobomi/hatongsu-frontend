@@ -1,18 +1,18 @@
+import { CharacterEntity } from "../core/characters/CharacterEntity";
 import { MyCharacter } from "../core/characters/MyCharacter";
 import { RemoteCharacter } from "../core/characters/RemoteCharacter";
-import { Entity } from "../core/engine/Entity";
 import { PLAYER_NAME } from "../data/const";
 import { IWSAnimationData, IWSTransform } from "../shared/worldserver.type";
 import { IManager } from "./Managers";
 
 export interface PlayerInfo {
-  sessionId: string;
+  playerId: string;
   isMine: boolean;
-  character: Entity;
+  character: CharacterEntity;
 }
 
 export class PlayerManager implements IManager {
-  players: PlayerInfo[] = [];
+  players = new Map<string, PlayerInfo>();
   myPlayer: PlayerInfo;
 
   public async Init() {}
@@ -21,43 +21,48 @@ export class PlayerManager implements IManager {
     this.players.forEach((player) => {
       player.character.Dispose();
     });
-    this.players = [];
+    this.players.clear();
   }
 
-  public async CreateMyPlayer(sessionId: string, transform: IWSTransform) {
+  public GetPlayer(playerId: string) {
+    return this.players.get(playerId);
+  }
+
+  public async CreateMyPlayer(playerId: string, transform: IWSTransform) {
     const myCharacter = new MyCharacter(PLAYER_NAME);
     myCharacter.InitMesh();
     myCharacter.InitTransform(transform);
 
+    const nickname = localStorage.getItem("nickname") || "Player";
+    myCharacter.CreateNicknameBillboard(nickname);
+
     const info: PlayerInfo = {
-      sessionId,
+      playerId,
       isMine: true,
       character: myCharacter,
     };
-    this.players.push(info);
+    this.players.set(playerId, info);
     this.myPlayer = info;
   }
 
-  public async CreateRemotePlayer(sessionId: string, transform: IWSTransform) {
+  public async CreateRemotePlayer(playerId: string, transform: IWSTransform) {
     const remoteCharacter = new RemoteCharacter(PLAYER_NAME);
     remoteCharacter.InitMesh();
     remoteCharacter.InitTransform(transform);
 
     const info: PlayerInfo = {
-      sessionId,
+      playerId,
       isMine: false,
       character: remoteCharacter,
     };
-    this.players.push(info);
+    this.players.set(playerId, info);
   }
 
-  public RemovePlayer(sessionId: string) {
-    const removeIndex = this.players.findIndex(
-      (player) => player.sessionId === sessionId
-    );
-    if (removeIndex !== -1) {
-      this.players[removeIndex].character.Dispose();
-      this.players.splice(removeIndex, 1);
+  public RemovePlayer(playerId: string): void {
+    const player = this.players.get(playerId);
+    if (player) {
+      player.character.Dispose();
+      this.players.delete(playerId);
     }
   }
 
@@ -65,7 +70,7 @@ export class PlayerManager implements IManager {
     playerId: string,
     transform: IWSTransform
   ) {
-    const player = this.players.find((p) => p.sessionId === playerId);
+    const player = this.players.get(playerId);
     if (player && !player.isMine) {
       const remoteChar = player.character as RemoteCharacter;
       remoteChar.ApplyNetworkTransform(transform);
@@ -73,7 +78,7 @@ export class PlayerManager implements IManager {
   }
 
   public UpdateRemotePlayerAnimation(playerId: string, data: IWSAnimationData) {
-    const player = this.players.find((p) => p.sessionId === playerId);
+    const player = this.players.get(playerId);
     if (player && !player.isMine) {
       const remoteChar = player.character as RemoteCharacter;
       remoteChar.ApplyNetworkAnimation(data);

@@ -6,6 +6,7 @@ import {
   Scene,
   StandardMaterial,
   Texture,
+  TransformNode,
 } from "@babylonjs/core";
 import axios from "axios";
 
@@ -30,9 +31,17 @@ export class GallerySpotManager implements IManager {
     return this.images;
   }
 
-  // TODO: 이미지 회전 및 크기 조절하기
-  public AssignMaterialToGallerySpot(spotMesh: Mesh, albumImage: AlbumImage) {
-    const material = new StandardMaterial(`${spotMesh.name}_Mat`, this.scene);
+  // TODO: 추후 블렌더를 좀 더 잘 다루게 되면, 축 계산 다시 해보기
+  public AssignMaterialToGallerySpot(
+    parentNode: TransformNode,
+    pictureMesh: Mesh,
+    frameMesh: Mesh,
+    albumImage: AlbumImage
+  ) {
+    const material = new StandardMaterial(
+      `${pictureMesh.name}_Mat`,
+      this.scene
+    );
     const texture = new Texture(
       albumImage.path,
       this.scene,
@@ -41,18 +50,46 @@ export class GallerySpotManager implements IManager {
       Texture.TRILINEAR_SAMPLINGMODE,
       () => {
         const size = texture.getSize();
-        console.log(`Image width: ${size.width}, height: ${size.height}`);
+        //console.log(`Image width: ${size.width}, height: ${size.height}`);
 
         texture.uScale = 1;
         texture.vScale = -1;
+        texture.wAng = Math.PI / 2;
         texture.anisotropicFilteringLevel = 16;
 
         material.diffuseTexture = texture;
         material.specularColor = new Color3(0, 0, 0);
 
-        spotMesh.material = material;
+        const imageWidth = size.width;
+        const imageHeight = size.height;
+        const isPortrait = imageHeight > imageWidth;
 
-        spotMesh.scaling.y = 2;
+        const effectiveAspect = isPortrait
+          ? imageHeight / imageWidth
+          : imageWidth / imageHeight;
+
+        // parentNode scale 은 같다고 가정
+        const baseSize = parentNode.scaling.x;
+
+        if (isPortrait) {
+          // 세로 모드: x축(높이)을 기준으로 스케일링
+          pictureMesh.scaling.x = baseSize * effectiveAspect;
+          pictureMesh.scaling.z = baseSize;
+
+          frameMesh.scaling.y = baseSize * effectiveAspect * 1.1;
+          frameMesh.scaling.z = baseSize * 1.1;
+        } else {
+          // 가로 모드: z축(너비)을 기준으로 스케일링
+          pictureMesh.scaling.z = baseSize * effectiveAspect;
+          pictureMesh.scaling.x = baseSize;
+
+          frameMesh.scaling.z = baseSize * effectiveAspect * 1.1;
+          frameMesh.scaling.y = baseSize * 1.1;
+        }
+
+        pictureMesh.material = material;
+
+        parentNode.scaling.setAll(1);
       }
     );
   }

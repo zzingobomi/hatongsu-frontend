@@ -13,10 +13,7 @@ import {
   ShadowGenerator,
   AbstractMesh,
   AxesViewer,
-  StandardMaterial,
-  Texture,
   Mesh,
-  Vector2,
 } from "@babylonjs/core";
 import { Inspector } from "@babylonjs/inspector";
 import { PlayerCamera } from "../core/engine/PlayerCamera";
@@ -149,16 +146,42 @@ export class WorldManager implements IManager {
     const images = Managers.GallerySpot.GetImages();
     for (const [index, image] of images.entries()) {
       try {
-        const meshName = `picture_${index + 1}`;
-        const pictureMesh = this.scene.meshes.find(
-          (mesh) => mesh.name === meshName
-        );
+        const parentNodeName = `picture_${index + 1}`;
+        const pictureMeshName = `image_${index + 1}`;
+        const frameMeshName = `frame_${index + 1}`;
+
+        const parentNode = this.scene.getTransformNodeByName(parentNodeName);
+        if (!parentNode) {
+          console.error(`TransformNode ${parentNodeName} not found`);
+          continue;
+        }
+
+        const pictureMesh = parentNode
+          .getChildren()
+          .find((child) => child.name === pictureMeshName) as Mesh;
+        if (!pictureMesh) {
+          console.error(
+            `Mesh ${pictureMeshName} not found in ${parentNodeName}`
+          );
+          continue;
+        }
+
+        const frameMesh = parentNode
+          .getChildren()
+          .find((child) => child.name === frameMeshName) as Mesh;
+        if (!frameMesh) {
+          console.error(`Mesh ${frameMeshName} not found in ${parentNodeName}`);
+          continue;
+        }
+
         Managers.GallerySpot.AssignMaterialToGallerySpot(
-          pictureMesh as Mesh,
+          parentNode,
+          pictureMesh,
+          frameMesh,
           image
         );
       } catch (error) {
-        console.error(`이미지 ${index + 1} 오류`);
+        console.error(`이미지 ${index + 1} 오류 ${error}`);
       }
     }
   }

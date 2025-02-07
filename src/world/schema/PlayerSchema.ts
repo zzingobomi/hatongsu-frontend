@@ -9,5 +9,6 @@ import { Schema, type, ArraySchema, MapSchema, SetSchema, DataChange } from '@co
 
 
 export class PlayerSchema extends Schema {
+    @type("string") public playerId!: string;
     @type("string") public nickname!: string;
 }

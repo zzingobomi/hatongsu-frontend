@@ -4,6 +4,8 @@ import { toBabylonQuaternion, toBabylonVector3 } from "@/world/utils/Utils";
 import {
   AbstractMesh,
   Color3,
+  DynamicTexture,
+  Material,
   Matrix,
   MeshBuilder,
   Quaternion,
@@ -17,6 +19,7 @@ export abstract class CharacterEntity extends Entity {
   protected currentState: CharacterState = CharacterState.IDLE;
   protected deltaTime: number = 0;
   protected showDebug: boolean = false;
+  protected nickname: string;
 
   constructor(assetName: string) {
     super(assetName);
@@ -36,6 +39,53 @@ export abstract class CharacterEntity extends Entity {
 
     this.rootMesh.position = initialPosition;
     this.rootMesh.rotationQuaternion = initialRotation;
+  }
+
+  public CreateNicknameBillboard(nickname: string): void {
+    this.nickname = nickname;
+
+    const plane = MeshBuilder.CreatePlane(
+      "nicknamePlane",
+      { width: 2, height: 1 },
+      this.scene
+    );
+    plane.parent = this.rootMesh;
+    plane.position.y = 4;
+    plane.billboardMode = AbstractMesh.BILLBOARDMODE_ALL;
+
+    const dynamicTexture = new DynamicTexture(
+      "nicknameTexture",
+      { width: 512, height: 256 },
+      this.scene,
+      false
+    );
+
+    const ctx = dynamicTexture.getContext();
+    ctx.fillStyle = "rgba(0, 0, 0, 0)";
+    ctx.fillRect(
+      0,
+      0,
+      dynamicTexture.getSize().width,
+      dynamicTexture.getSize().height
+    );
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "48px Arial";
+
+    const textWidth = ctx.measureText(nickname).width;
+    const x = (dynamicTexture.getSize().width - textWidth) / 2;
+    ctx.fillText(nickname, x, 50);
+    dynamicTexture.update();
+
+    const mat = new StandardMaterial("nicknameMat", this.scene);
+    mat.emissiveTexture = dynamicTexture;
+    mat.diffuseTexture = dynamicTexture;
+    mat.opacityTexture = dynamicTexture;
+    mat.disableLighting = true;
+    mat.transparencyMode = Material.MATERIAL_ALPHABLEND;
+    mat.backFaceCulling = false;
+
+    plane.material = mat;
+    plane.isPickable = false;
   }
 
   public Dispose(): void {

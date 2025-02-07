@@ -9,6 +9,7 @@ import { useChatStore } from "@/app/stores/ChatStore";
 import { PlayerSchema } from "../schema/PlayerSchema";
 import { GalleryRoomState } from "../schema/GalleryRoomState";
 import { SERVER_NICKNAME } from "../data/const";
+import { Managers } from "./Managers";
 
 export class EventServerManager {
   private client: Colyseus.Client;
@@ -42,7 +43,8 @@ export class EventServerManager {
         reject("Nickname is not set");
         return;
       }
-      const options: ESJoinOptions = { nickname };
+      const playerId = Managers.WorldServer.GetPlayerId();
+      const options: ESJoinOptions = { playerId, nickname };
 
       this.client
         .join(ESGalleryRoomName, options)
@@ -75,8 +77,14 @@ export class EventServerManager {
 
     this.room.state.players.onAdd((player: PlayerSchema, sessionId: string) => {
       if (sessionId !== this.sessionId) {
+        const remotePlayer = Managers.Players.GetPlayer(player.playerId);
+        if (remotePlayer) {
+          remotePlayer.character.CreateNicknameBillboard(player.nickname);
+        }
+
         useChatStore.getState().addMessage({
           sessionId,
+          playerId: Managers.WorldServer.GetPlayerId(),
           nickname: SERVER_NICKNAME,
           message: `${player.nickname} 님이 갤러리에 입장하셨습니다.`,
           timestamp: Date.now(),
@@ -90,6 +98,7 @@ export class EventServerManager {
         if (sessionId !== this.sessionId) {
           useChatStore.getState().addMessage({
             sessionId,
+            playerId: Managers.WorldServer.GetPlayerId(),
             nickname: SERVER_NICKNAME,
             message: `${player.nickname} 님이 갤러리를 떠나셨습니다.`,
             timestamp: Date.now(),

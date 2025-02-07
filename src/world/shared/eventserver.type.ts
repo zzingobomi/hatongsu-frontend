@@ -9,11 +9,13 @@ export enum ESMessageType {
 }
 
 export interface ESJoinOptions {
+  playerId: string;
   nickname: string;
 }
 
 export interface ESChatMessage {
   sessionId: string;
+  playerId: string;
   nickname: string;
   message: string;
   timestamp: number;

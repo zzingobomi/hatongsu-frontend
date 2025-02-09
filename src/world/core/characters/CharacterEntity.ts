@@ -4,8 +4,6 @@ import { toBabylonQuaternion, toBabylonVector3 } from "@/world/utils/Utils";
 import {
   AbstractMesh,
   Color3,
-  DynamicTexture,
-  Material,
   Matrix,
   MeshBuilder,
   Quaternion,
@@ -13,13 +11,29 @@ import {
   StandardMaterial,
   Vector3,
 } from "@babylonjs/core";
+import {
+  AdvancedDynamicTexture,
+  TextBlock,
+  Rectangle,
+  Control,
+} from "@babylonjs/gui";
 import { Managers } from "@/world/managers/Managers";
 
 export abstract class CharacterEntity extends Entity {
   protected currentState: CharacterState = CharacterState.IDLE;
   protected deltaTime: number = 0;
   protected showDebug: boolean = false;
+
+  // nickname
   protected nickname: string;
+  protected nicknameText: TextBlock;
+
+  // chatting bubble
+  protected currentChattingBubble: {
+    mesh: AbstractMesh;
+    texture: AdvancedDynamicTexture;
+  } | null = null;
+  protected chattingTimeout: NodeJS.Timeout | null = null;
 
   constructor(assetName: string) {
     super(assetName);
@@ -42,50 +56,111 @@ export abstract class CharacterEntity extends Entity {
   }
 
   public CreateNicknameBillboard(nickname: string): void {
-    this.nickname = nickname;
-
     const plane = MeshBuilder.CreatePlane(
       "nicknamePlane",
-      { width: 2, height: 1 },
+      { width: 2, height: 2 },
       this.scene
     );
     plane.parent = this.rootMesh;
-    plane.position.y = 4;
-    plane.billboardMode = AbstractMesh.BILLBOARDMODE_ALL;
+    plane.position.y = 4.5;
+    plane.billboardMode = AbstractMesh.BILLBOARDMODE_Y;
 
-    const dynamicTexture = new DynamicTexture(
-      "nicknameTexture",
-      { width: 512, height: 256 },
-      this.scene,
-      false
+    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(plane);
+
+    const background = new Rectangle();
+    background.background = "rgba(0, 0, 0, 0.7)";
+    background.cornerRadius = 50;
+    background.width = 0.8;
+    background.height = "120px";
+    background.thickness = 0;
+    background.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+
+    const textBlock = new TextBlock();
+    textBlock.text = nickname;
+    textBlock.color = "white";
+    textBlock.fontSize = 72;
+    textBlock.fontFamily = "Arial";
+    textBlock.paddingTop = "8px";
+    textBlock.paddingBottom = "8px";
+    textBlock.resizeToFit = true;
+
+    background.addControl(textBlock);
+    advancedTexture.addControl(background);
+
+    advancedTexture.idealWidth = 800;
+    advancedTexture.renderAtIdealSize = true;
+  }
+
+  public ShowChattingMessage(message: string, duration: number = 3000): void {
+    // 기존 말풍선 제거
+    this.clearChattingBubble();
+
+    // 1. 말풍선 메시 생성
+    const bubbleMesh = MeshBuilder.CreatePlane(
+      "chattingBubble",
+      { width: 3, height: 1.5 },
+      this.scene
     );
+    bubbleMesh.parent = this.rootMesh;
+    bubbleMesh.position.y = 3.2; // 닉네임 아래 위치
+    bubbleMesh.billboardMode = AbstractMesh.BILLBOARDMODE_Y;
 
-    const ctx = dynamicTexture.getContext();
-    ctx.fillStyle = "rgba(0, 0, 0, 0)";
-    ctx.fillRect(
-      0,
-      0,
-      dynamicTexture.getSize().width,
-      dynamicTexture.getSize().height
-    );
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "48px Arial";
+    // 2. GUI 텍스처 생성
+    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(bubbleMesh);
 
-    const textWidth = ctx.measureText(nickname).width;
-    const x = (dynamicTexture.getSize().width - textWidth) / 2;
-    ctx.fillText(nickname, x, 50);
-    dynamicTexture.update();
+    // 3. 말풍선 배경
+    const bubbleBackground = new Rectangle();
+    bubbleBackground.background = "rgba(255, 255, 255, 0.9)";
+    bubbleBackground.cornerRadius = 20;
+    bubbleBackground.thickness = 2;
+    bubbleBackground.color = "#000000";
+    bubbleBackground.paddingTop = "20px";
+    bubbleBackground.paddingBottom = "40px"; // 꼬리 공간 확보
 
-    const mat = new StandardMaterial("nicknameMat", this.scene);
-    mat.emissiveTexture = dynamicTexture;
-    mat.diffuseTexture = dynamicTexture;
-    mat.opacityTexture = dynamicTexture;
-    mat.disableLighting = true;
-    mat.transparencyMode = Material.MATERIAL_ALPHABLEND;
-    mat.backFaceCulling = false;
+    // 4. 말풍선 텍스트
+    const textBlock = new TextBlock();
+    textBlock.text = message;
+    textBlock.color = "#000000";
+    textBlock.fontSize = 42;
+    textBlock.fontFamily = "Arial";
+    textBlock.textWrapping = true;
+    textBlock.resizeToFit = true;
+    textBlock.width = 0.9; // 90% 너비 사용
 
-    plane.material = mat;
-    plane.isPickable = false;
+    // 5. 말풍선 꼬리
+    const tail = new Rectangle();
+    tail.width = "40px";
+    tail.height = "40px";
+    tail.background = "rgba(255, 255, 255, 0.9)";
+    tail.thickness = 2;
+    tail.color = "#000000";
+    tail.rotation = 45; // 45도 회전
+    tail.top = "-20px"; // 배경 아래로 이동
+
+    // 계층 구조 구성
+    bubbleBackground.addControl(textBlock);
+    bubbleBackground.addControl(tail);
+    advancedTexture.addControl(bubbleBackground);
+
+    // 6. 자동 제거 설정
+    this.chattingTimeout = setTimeout(() => {
+      this.clearChattingBubble();
+    }, duration);
+
+    this.currentChattingBubble = { mesh: bubbleMesh, texture: advancedTexture };
+  }
+
+  private clearChattingBubble(): void {
+    if (this.chattingTimeout) {
+      clearTimeout(this.chattingTimeout);
+      this.chattingTimeout = null;
+    }
+
+    if (this.currentChattingBubble) {
+      this.currentChattingBubble.texture.dispose();
+      this.currentChattingBubble.mesh.dispose();
+      this.currentChattingBubble = null;
+    }
   }
 
   public Dispose(): void {

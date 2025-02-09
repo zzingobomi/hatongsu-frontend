@@ -11,9 +11,12 @@ importers:
       '@babylonjs/core':
         specifier: ^7.45.0
         version: 7.45.0
+      '@babylonjs/gui':
+        specifier: ^7.48.1
+        version: 7.48.1(@babylonjs/core@7.45.0)
       '@babylonjs/inspector':
         specifier: ^7.45.0
-        version: 7.45.0(@babylonjs/core@7.45.0)(@babylonjs/gui-editor@7.45.0(@babylonjs/core@7.45.0)(@babylonjs/gui@7.45.0(@babylonjs/core@7.45.0))(@types/react-dom@19.0.2(@types/react@19.0.3))(@types/react@19.0.3))(@babylonjs/gui@7.45.0(@babylonjs/core@7.45.0))(@babylonjs/loaders@7.45.0(@babylonjs/core@7.45.0)(babylonjs-gltf2interface@7.45.0))(@babylonjs/materials@7.45.0(@babylonjs/core@7.45.0))(@babylonjs/serializers@7.45.0(@babylonjs/core@7.45.0)(babylonjs-gltf2interface@7.45.0))(@types/react-dom@19.0.2(@types/react@19.0.3))(@types/react@19.0.3)
+        version: 7.45.0(@babylonjs/core@7.45.0)(@babylonjs/gui-editor@7.45.0(@babylonjs/core@7.45.0)(@babylonjs/gui@7.48.1(@babylonjs/core@7.45.0))(@types/react-dom@19.0.2(@types/react@19.0.3))(@types/react@19.0.3))(@babylonjs/gui@7.48.1(@babylonjs/core@7.45.0))(@babylonjs/loaders@7.45.0(@babylonjs/core@7.45.0)(babylonjs-gltf2interface@7.45.0))(@babylonjs/materials@7.45.0(@babylonjs/core@7.45.0))(@babylonjs/serializers@7.45.0(@babylonjs/core@7.45.0)(babylonjs-gltf2interface@7.45.0))(@types/react-dom@19.0.2(@types/react@19.0.3))(@types/react@19.0.3)
       '@babylonjs/loaders':
         specifier: ^7.45.0
         version: 7.45.0(@babylonjs/core@7.45.0)(babylonjs-gltf2interface@7.45.0)
@@ -288,8 +291,8 @@ packages:
       '@types/react': '>=16.7.3'
       '@types/react-dom': '>=16.0.9'
 
-  '@babylonjs/gui@7.45.0':
-    resolution: {integrity: sha512-mJv5dHp7Jl+fGV6Pjs0u3uOvf9Dz/1ye8SqE7rcFCipcjsxLhLfaUAFsufNyxxgT1tkutF5WLWDP7KX11PMHPQ==}
+  '@babylonjs/gui@7.48.1':
+    resolution: {integrity: sha512-gtC4v6sL08V9nd/O801oziyKXbrASG8fCI7n4zV/Vaaw4H4nfjoy0QOaWETyDf9WFKoXLqnPhjKpf35tWbT4VA==}
     peerDependencies:
       '@babylonjs/core': ^7.0.0
 
@@ -3350,22 +3353,22 @@ snapshots:
 
   '@babylonjs/core@7.45.0': {}
 
-  '@babylonjs/gui-editor@7.45.0(@babylonjs/core@7.45.0)(@babylonjs/gui@7.45.0(@babylonjs/core@7.45.0))(@types/react-dom@19.0.2(@types/react@19.0.3))(@types/react@19.0.3)':
+  '@babylonjs/gui-editor@7.45.0(@babylonjs/core@7.45.0)(@babylonjs/gui@7.48.1(@babylonjs/core@7.45.0))(@types/react-dom@19.0.2(@types/react@19.0.3))(@types/react@19.0.3)':
     dependencies:
       '@babylonjs/core': 7.45.0
-      '@babylonjs/gui': 7.45.0(@babylonjs/core@7.45.0)
+      '@babylonjs/gui': 7.48.1(@babylonjs/core@7.45.0)
       '@types/react': 19.0.3
       '@types/react-dom': 19.0.2(@types/react@19.0.3)
 
-  '@babylonjs/gui@7.45.0(@babylonjs/core@7.45.0)':
+  '@babylonjs/gui@7.48.1(@babylonjs/core@7.45.0)':
     dependencies:
       '@babylonjs/core': 7.45.0
 
-  '@babylonjs/inspector@7.45.0(@babylonjs/core@7.45.0)(@babylonjs/gui-editor@7.45.0(@babylonjs/core@7.45.0)(@babylonjs/gui@7.45.0(@babylonjs/core@7.45.0))(@types/react-dom@19.0.2(@types/react@19.0.3))(@types/react@19.0.3))(@babylonjs/gui@7.45.0(@babylonjs/core@7.45.0))(@babylonjs/loaders@7.45.0(@babylonjs/core@7.45.0)(babylonjs-gltf2interface@7.45.0))(@babylonjs/materials@7.45.0(@babylonjs/core@7.45.0))(@babylonjs/serializers@7.45.0(@babylonjs/core@7.45.0)(babylonjs-gltf2interface@7.45.0))(@types/react-dom@19.0.2(@types/react@19.0.3))(@types/react@19.0.3)':
+  '@babylonjs/inspector@7.45.0(@babylonjs/core@7.45.0)(@babylonjs/gui-editor@7.45.0(@babylonjs/core@7.45.0)(@babylonjs/gui@7.48.1(@babylonjs/core@7.45.0))(@types/react-dom@19.0.2(@types/react@19.0.3))(@types/react@19.0.3))(@babylonjs/gui@7.48.1(@babylonjs/core@7.45.0))(@babylonjs/loaders@7.45.0(@babylonjs/core@7.45.0)(babylonjs-gltf2interface@7.45.0))(@babylonjs/materials@7.45.0(@babylonjs/core@7.45.0))(@babylonjs/serializers@7.45.0(@babylonjs/core@7.45.0)(babylonjs-gltf2interface@7.45.0))(@types/react-dom@19.0.2(@types/react@19.0.3))(@types/react@19.0.3)':
     dependencies:
       '@babylonjs/core': 7.45.0
-      '@babylonjs/gui': 7.45.0(@babylonjs/core@7.45.0)
-      '@babylonjs/gui-editor': 7.45.0(@babylonjs/core@7.45.0)(@babylonjs/gui@7.45.0(@babylonjs/core@7.45.0))(@types/react-dom@19.0.2(@types/react@19.0.3))(@types/react@19.0.3)
+      '@babylonjs/gui': 7.48.1(@babylonjs/core@7.45.0)
+      '@babylonjs/gui-editor': 7.45.0(@babylonjs/core@7.45.0)(@babylonjs/gui@7.48.1(@babylonjs/core@7.45.0))(@types/react-dom@19.0.2(@types/react@19.0.3))(@types/react@19.0.3)
       '@babylonjs/loaders': 7.45.0(@babylonjs/core@7.45.0)(babylonjs-gltf2interface@7.45.0)
       '@babylonjs/materials': 7.45.0(@babylonjs/core@7.45.0)
       '@babylonjs/serializers': 7.45.0(@babylonjs/core@7.45.0)(babylonjs-gltf2interface@7.45.0)

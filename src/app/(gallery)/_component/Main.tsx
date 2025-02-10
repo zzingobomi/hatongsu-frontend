@@ -1,27 +1,31 @@
 "use client";
 
 import { World } from "@/world";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import ChatView from "@/components/gallery/ChatView";
 
 export default function Main() {
-  const nickname = localStorage.getItem("nickname");
   const router = useRouter();
-
-  if (!nickname) {
-    router.push("/lobby");
-    return null;
-  }
-
+  const [nickname, setNickname] = useState<string | null>(null);
   const worldRef = useRef<World>(null);
 
   useEffect(() => {
-    (async () => {
-      const { World } = await import("@/world");
-      worldRef.current = new World();
-    })();
-  }, []);
+    const storedNickname = localStorage.getItem("nickname");
+    if (!storedNickname) {
+      router.push("/lobby");
+    } else {
+      setNickname(storedNickname);
+      (async () => {
+        const { World } = await import("@/world");
+        worldRef.current = new World();
+      })();
+    }
+  }, [router]);
+
+  if (!nickname) {
+    return null;
+  }
 
   return (
     <div className="h-screen w-screen bg-gray-900 relative">

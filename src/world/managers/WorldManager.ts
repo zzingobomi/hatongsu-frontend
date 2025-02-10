@@ -14,6 +14,7 @@ import {
   AbstractMesh,
   AxesViewer,
   Mesh,
+  PointLight,
 } from "@babylonjs/core";
 import { Inspector } from "@babylonjs/inspector";
 import { PlayerCamera } from "../core/engine/PlayerCamera";
@@ -109,6 +110,9 @@ export class WorldManager implements IManager {
     );
     light2.position = new Vector3(30, 30, 0);
     light2.intensity = 1.0;
+
+    // point light
+    //const pointLight = new PointLight("PointLight", new Vector3(0, 5, 0));
 
     //const axisHelper = new AxesViewer(this.scene, 5);
 

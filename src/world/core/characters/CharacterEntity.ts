@@ -58,96 +58,111 @@ export abstract class CharacterEntity extends Entity {
   public CreateNicknameBillboard(nickname: string): void {
     const plane = MeshBuilder.CreatePlane(
       "nicknamePlane",
-      { width: 2, height: 2 },
+      { width: 10, height: 10 },
       this.scene
     );
     plane.parent = this.rootMesh;
-    plane.position.y = 4.5;
-    plane.billboardMode = AbstractMesh.BILLBOARDMODE_Y;
+    plane.position.y = 4.2;
+    plane.billboardMode = AbstractMesh.BILLBOARDMODE_ALL;
 
     const advancedTexture = AdvancedDynamicTexture.CreateForMesh(plane);
 
     const background = new Rectangle();
-    background.background = "rgba(0, 0, 0, 0.7)";
-    background.cornerRadius = 50;
-    background.width = 0.8;
-    background.height = "120px";
+    background.background = "rgba(0, 0, 0, 0.5)";
+    background.cornerRadius = 16;
     background.thickness = 0;
     background.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+    background.adaptWidthToChildren = true;
+    background.adaptHeightToChildren = true;
 
     const textBlock = new TextBlock();
     textBlock.text = nickname;
     textBlock.color = "white";
-    textBlock.fontSize = 72;
+    textBlock.fontSize = 32;
     textBlock.fontFamily = "Arial";
-    textBlock.paddingTop = "8px";
-    textBlock.paddingBottom = "8px";
+    textBlock.setPadding(16, 16, 16, 16);
     textBlock.resizeToFit = true;
 
     background.addControl(textBlock);
     advancedTexture.addControl(background);
-
-    advancedTexture.idealWidth = 800;
-    advancedTexture.renderAtIdealSize = true;
   }
 
-  public ShowChattingMessage(message: string, duration: number = 3000): void {
-    // 기존 말풍선 제거
+  public ShowChattingMessage(message: string, duration: number = 5000): void {
     this.clearChattingBubble();
 
-    // 1. 말풍선 메시 생성
-    const bubbleMesh = MeshBuilder.CreatePlane(
-      "chattingBubble",
-      { width: 3, height: 1.5 },
+    const chattingMesh = MeshBuilder.CreatePlane(
+      "chattingPlane",
+      { width: 10, height: 10 },
       this.scene
     );
-    bubbleMesh.parent = this.rootMesh;
-    bubbleMesh.position.y = 3.2; // 닉네임 아래 위치
-    bubbleMesh.billboardMode = AbstractMesh.BILLBOARDMODE_Y;
+    chattingMesh.parent = this.rootMesh;
+    chattingMesh.position.y = 5.2;
+    chattingMesh.billboardMode = AbstractMesh.BILLBOARDMODE_ALL;
 
-    // 2. GUI 텍스처 생성
-    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(bubbleMesh);
+    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(chattingMesh);
 
-    // 3. 말풍선 배경
-    const bubbleBackground = new Rectangle();
-    bubbleBackground.background = "rgba(255, 255, 255, 0.9)";
-    bubbleBackground.cornerRadius = 20;
-    bubbleBackground.thickness = 2;
-    bubbleBackground.color = "#000000";
-    bubbleBackground.paddingTop = "20px";
-    bubbleBackground.paddingBottom = "40px"; // 꼬리 공간 확보
+    const bubbleContainer = new Rectangle();
+    bubbleContainer.background = "rgba(255, 255, 255, 1)";
+    bubbleContainer.cornerRadius = 16;
+    bubbleContainer.thickness = 0;
+    bubbleContainer.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+    bubbleContainer.color = "#000000";
+    bubbleContainer.adaptWidthToChildren = true;
+    bubbleContainer.adaptHeightToChildren = true;
+    bubbleContainer.paddingBottom = "30px";
 
-    // 4. 말풍선 텍스트
     const textBlock = new TextBlock();
-    textBlock.text = message;
+    textBlock.text = this.formatTextWithWordWrap(message);
     textBlock.color = "#000000";
-    textBlock.fontSize = 42;
+    textBlock.fontSize = 24;
     textBlock.fontFamily = "Arial";
-    textBlock.textWrapping = true;
+    textBlock.setPadding(16, 16, 16, 16);
     textBlock.resizeToFit = true;
-    textBlock.width = 0.9; // 90% 너비 사용
 
-    // 5. 말풍선 꼬리
     const tail = new Rectangle();
-    tail.width = "40px";
-    tail.height = "40px";
-    tail.background = "rgba(255, 255, 255, 0.9)";
-    tail.thickness = 2;
+    tail.width = "30px";
+    tail.height = "30px";
+    tail.background = "rgba(255, 255, 255, 1)";
+    tail.thickness = 0;
     tail.color = "#000000";
-    tail.rotation = 45; // 45도 회전
-    tail.top = "-20px"; // 배경 아래로 이동
+    tail.rotation = 45 * (Math.PI / 180);
+    tail.top = "15px";
 
-    // 계층 구조 구성
-    bubbleBackground.addControl(textBlock);
-    bubbleBackground.addControl(tail);
-    advancedTexture.addControl(bubbleBackground);
+    advancedTexture.addControl(bubbleContainer);
+    advancedTexture.addControl(tail);
+    bubbleContainer.addControl(textBlock);
 
-    // 6. 자동 제거 설정
+    bubbleContainer.onAfterDrawObservable.add(() => {
+      if (bubbleContainer._currentMeasure) {
+        const containerHeight = bubbleContainer._currentMeasure.height;
+        tail.top = containerHeight / 2 - 15 + "px";
+      }
+    });
+
     this.chattingTimeout = setTimeout(() => {
       this.clearChattingBubble();
     }, duration);
 
-    this.currentChattingBubble = { mesh: bubbleMesh, texture: advancedTexture };
+    this.currentChattingBubble = {
+      mesh: chattingMesh,
+      texture: advancedTexture,
+    };
+  }
+
+  private formatTextWithWordWrap(message: string): string {
+    const maxLength = 10;
+    let result = "";
+    let line = "";
+
+    message.split(" ").forEach((word) => {
+      if ((line + word).length > maxLength) {
+        result += line.trim() + "\n";
+        line = "";
+      }
+      line += word + " ";
+    });
+
+    return (result + line).trim();
   }
 
   private clearChattingBubble(): void {

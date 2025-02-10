@@ -113,6 +113,18 @@ export class EventServerManager {
     console.log("Chat message received", message);
     const isMine = message.sessionId === this.sessionId;
     useChatStore.getState().addMessage({ ...message, isMine });
+
+    if (!isMine) {
+      const remotePlayer = Managers.Players.GetPlayer(message.playerId);
+      if (remotePlayer) {
+        remotePlayer.character.ShowChattingMessage(message.message);
+      }
+    } else {
+      const myPlayer = Managers.Players.GetPlayer(message.playerId);
+      if (myPlayer) {
+        myPlayer.character.ShowChattingMessage(message.message);
+      }
+    }
   }
 
   private subscribeMyChatMessage() {

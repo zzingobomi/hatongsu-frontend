@@ -33,6 +33,7 @@ export class WorldServerManager implements IManager {
     return new Promise((resolve, reject) => {
       this.channel.onConnect((error) => {
         if (error) {
+          console.error("Error connecting to World Server", error);
           reject(error);
         } else {
           if (this.channel.id) {

@@ -30,12 +30,15 @@ import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { TableSort } from "./TableSort";
 import Image from "next/image";
+import { useToast } from "@/hooks/use-toast";
+import { deleteAlbumImages } from "@/lib/deleteAlbumImages";
 
 interface AlbumImageTableProps {
   data: AlbumImage[];
   totalCount: number;
   pagination: { pageIndex: number; pageSize: number };
   onPaginationChange: OnChangeFn<{ pageIndex: number; pageSize: number }>;
+  onDeleteSuccess?: () => void;
   sort: string;
   setSort: (sort: string) => void;
   isLoading: boolean;
@@ -49,12 +52,15 @@ export default function AlbumImageTable({
   totalCount,
   pagination,
   onPaginationChange,
+  onDeleteSuccess,
   sort,
   setSort,
   isLoading,
   error,
 }: AlbumImageTableProps) {
+  const { toast } = useToast();
   const [deleteIds, setDeleteIds] = useState<string[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const columns = useMemo(
     () => [
@@ -234,13 +240,33 @@ export default function AlbumImageTable({
     );
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (deleteIds.length === 0) {
-      alert("삭제할 항목을 선택하세요.");
+      toast({
+        title: "삭제할 항목을 선택해주세요",
+        variant: "destructive",
+      });
       return;
     }
-    console.log("선택된 항목의 ID:", deleteIds);
-    // TODO: 삭제 로직 추가
+
+    setIsDeleting(true);
+
+    try {
+      await deleteAlbumImages({ imageIds: deleteIds });
+
+      setDeleteIds([]);
+      onDeleteSuccess?.();
+    } catch (error) {
+      console.error("Error deleting album images", error);
+      toast({
+        title: "이미지 삭제 중 오류가 발생했습니다",
+        description: (error as Error).message,
+        variant: "destructive",
+      });
+      return;
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   if (isLoading) return <div>Loading...</div>;
@@ -256,9 +282,14 @@ export default function AlbumImageTable({
         <TableSort sort={sort} onSortChange={setSort} />
         <button
           onClick={handleDelete}
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+          disabled={deleteIds.length === 0 || isDeleting}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
-          삭제하기
+          {isDeleting
+            ? "삭제 중..."
+            : deleteIds.length > 0
+            ? `선택 항목 삭제 (${deleteIds.length})`
+            : "삭제하기"}
         </button>
       </div>
       <div className="overflow-x-scroll xl:overflow-x-hidden">

@@ -3,14 +3,14 @@
 import DashboardLayout from "@/components/layout";
 import { User } from "@/model/User";
 import AlbumImageTable from "./components/AlbumImageTable";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlbumImagesError,
   AlbumImagesQuery,
   AlbumImagesResponse,
   getAlbumImages,
 } from "@/lib/getAlbumImages";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { OnChangeFn } from "@tanstack/react-table";
 
 interface Props {
@@ -18,6 +18,7 @@ interface Props {
 }
 
 export default function AlbumView(props: Props) {
+  const queryClient = useQueryClient();
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -47,6 +48,19 @@ export default function AlbumView(props: Props) {
     );
   };
 
+  const handleDeleteSuccess = () => {
+    queryClient.invalidateQueries({
+      queryKey: ["albumImages", { ...pagination, sort }],
+    });
+
+    if (data && data.albumImages.length === 1 && pagination.pageIndex > 0) {
+      setPagination((prev) => ({
+        ...prev,
+        pageIndex: prev.pageIndex - 1,
+      }));
+    }
+  };
+
   useEffect(() => {
     console.log(data);
   }, [data]);
@@ -60,6 +74,7 @@ export default function AlbumView(props: Props) {
             totalCount={data?.totalCount ?? 0}
             pagination={pagination}
             onPaginationChange={handlePaginationChange}
+            onDeleteSuccess={handleDeleteSuccess}
             sort={sort}
             setSort={setSort}
             isLoading={isLoading}

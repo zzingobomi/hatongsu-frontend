@@ -12,7 +12,7 @@ import axios from "axios";
 
 export class GallerySpotManager implements IManager {
   scene: Scene;
-  images: AlbumImage[] = [];
+  spotImages: Record<string, { images: AlbumImage[] }> = {};
 
   public async Init() {
     this.scene = Managers.World.scene;
@@ -24,11 +24,11 @@ export class GallerySpotManager implements IManager {
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/album/gallery/spot`
     );
-    this.images = response.data.albumImages;
+    this.spotImages = response.data.spotImages;
   }
 
-  public GetImages(): AlbumImage[] {
-    return this.images;
+  public GetSpotImages(): Record<string, { images: AlbumImage[] }> {
+    return this.spotImages;
   }
 
   // TODO: 추후 블렌더를 좀 더 잘 다루게 되면, 축 계산 다시 해보기

@@ -146,46 +146,35 @@ export class WorldManager implements IManager {
 
   private async initGallerySpot() {
     await Managers.GallerySpot.LoadGallerySpot();
+    const spotImages = Managers.GallerySpot.GetSpotImages();
 
-    const images = Managers.GallerySpot.GetImages();
-    for (const [index, image] of images.entries()) {
+    for (const [spotType, { images }] of Object.entries(spotImages)) {
       try {
-        const parentNodeName = `picture_${index + 1}`;
-        const pictureMeshName = `image_${index + 1}`;
-        const frameMeshName = `frame_${index + 1}`;
+        const spotImage = images[0];
+        const parentNodeName = `${spotType}`;
 
         const parentNode = this.scene.getTransformNodeByName(parentNodeName);
         if (!parentNode) {
-          console.error(`TransformNode ${parentNodeName} not found`);
+          console.warn(`${spotType}에 해당하는 Transform이 없습니다.`);
           continue;
         }
 
         const pictureMesh = parentNode
           .getChildren()
-          .find((child) => child.name === pictureMeshName) as Mesh;
-        if (!pictureMesh) {
-          console.error(
-            `Mesh ${pictureMeshName} not found in ${parentNodeName}`
-          );
-          continue;
-        }
+          .find((child) => child.name === `${spotType}_picture`) as Mesh;
 
         const frameMesh = parentNode
           .getChildren()
-          .find((child) => child.name === frameMeshName) as Mesh;
-        if (!frameMesh) {
-          console.error(`Mesh ${frameMeshName} not found in ${parentNodeName}`);
-          continue;
-        }
+          .find((child) => child.name === `${spotType}_frame`) as Mesh;
 
         Managers.GallerySpot.AssignMaterialToGallerySpot(
           parentNode,
           pictureMesh,
           frameMesh,
-          image
+          spotImage
         );
       } catch (error) {
-        console.error(`이미지 ${index + 1} 오류 ${error}`);
+        console.error(`${spotType} 처리 오류:`, error);
       }
     }
   }

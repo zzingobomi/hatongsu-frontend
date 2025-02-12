@@ -2,18 +2,24 @@
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo, useState } from "react";
 import Image from "next/image";
 import { getAlbumImagesInfinite } from "@/lib/getAlbumImagesInfinite";
 
 export default function AlbumGallery() {
   const ITEM_SIZE = 300;
-  const GAP_SIZE = 16;
+  const GAP_SIZE = 8;
   const OVERSCAN = 3;
-  const SCALE_RANGE = [0.85, 1];
-  const OPACITY_RANGE = [0.6, 1];
+  const PERSPECTIVE = 1200;
+
+  // 3D 효과 관련 설정
+  const SCALE_RANGE = [0.8, 1.0];
+  const ROTATION_RANGE = [-8, 8];
+  const OPACITY_RANGE = [0.4, 1];
+  const DEPTH_FACTOR = 150;
 
   const parentRef = useRef<HTMLDivElement>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const {
     data,
@@ -50,33 +56,61 @@ export default function AlbumGallery() {
   const parentOffset = virtualizer.scrollElement?.scrollTop || 0;
   const viewportHeight = virtualizer.scrollElement?.clientHeight || 0;
 
+  useEffect(() => {
+    if (vItems.length > 0 && isInitialLoad) {
+      setIsInitialLoad(false);
+    }
+  }, [vItems]);
+
   const itemStyles = useMemo(() => {
     return vItems.map((virtualItem) => {
       const itemCenter = virtualItem.start + ITEM_SIZE / 2;
       const viewportCenter = parentOffset + viewportHeight / 2;
-      const distance = Math.abs(itemCenter - viewportCenter);
-      const normalizedDistance = Math.min(distance / (viewportHeight / 2), 1);
+      let distance = itemCenter - viewportCenter;
 
+      // 초기 로딩 시 첫 번째 아이템을 중앙에 배치
+      if (isInitialLoad && virtualItem.index === 0) {
+        distance = 0;
+      }
+
+      const normalizedDistance = Math.min(
+        Math.abs(distance) / (viewportHeight * 0.4),
+        1
+      );
+      const direction = Math.sign(distance);
+
+      // 3D 변환 값 계산
       const scale =
         SCALE_RANGE[1] - (SCALE_RANGE[1] - SCALE_RANGE[0]) * normalizedDistance;
-
       const opacity =
         OPACITY_RANGE[1] -
         (OPACITY_RANGE[1] - OPACITY_RANGE[0]) * normalizedDistance;
-
-      const blur = normalizedDistance * 4;
+      const rotateX =
+        ROTATION_RANGE[0] +
+        (ROTATION_RANGE[1] - ROTATION_RANGE[0]) *
+          normalizedDistance *
+          direction;
+      const translateZ = -DEPTH_FACTOR * normalizedDistance;
 
       return {
-        scale: Math.min(Math.max(scale, SCALE_RANGE[0]), SCALE_RANGE[1]),
-        opacity: Math.min(
-          Math.max(opacity, OPACITY_RANGE[0]),
-          OPACITY_RANGE[1]
-        ),
-        blur,
+        transform: `perspective(${PERSPECTIVE}px)
+                   scale(${scale})
+                   rotateX(${rotateX}deg)
+                   translateZ(${translateZ}px)`,
+        opacity,
         zIndex: Math.floor((1 - normalizedDistance) * 100),
+        filter: `blur(${normalizedDistance * 3}px)`,
       };
     });
-  }, [vItems, parentOffset, viewportHeight]);
+  }, [vItems, parentOffset, viewportHeight, isInitialLoad]);
+
+  // 초기 중앙 정렬 스크롤
+  useEffect(() => {
+    if (isInitialLoad && virtualizer.getTotalSize() > 0 && parentRef.current) {
+      const initialScroll = (virtualizer.getTotalSize() - viewportHeight) / 2;
+      parentRef.current.scrollTo(0, initialScroll);
+    }
+  }, [isInitialLoad, virtualizer.getTotalSize(), viewportHeight]);
 
   useEffect(() => {
     const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
@@ -101,6 +135,7 @@ export default function AlbumGallery() {
         style={{
           height: `${virtualizer.getTotalSize()}px`,
           position: "relative",
+          padding: `${viewportHeight / 2 - ITEM_SIZE / 2}px 0`,
         }}
       >
         {vItems.map((virtualItem, index) => {
@@ -110,27 +145,25 @@ export default function AlbumGallery() {
           return (
             <div
               key={virtualItem.key}
-              className="absolute left-0 right-0 px-4 origin-top transition-all duration-300 ease-out"
+              className="absolute left-0 right-0 px-4 origin-center transition-all duration-300 ease-out"
               style={{
                 top: `${virtualItem.start}px`,
                 height: `${ITEM_SIZE}px`,
-                paddingBottom: `${GAP_SIZE}px`,
-                transform: `scale(${style.scale})`,
-                opacity: style.opacity,
-                filter: `blur(${style.blur}px)`,
-                zIndex: style.zIndex,
+                marginBottom: `${GAP_SIZE}px`,
+                ...style,
               }}
             >
               {item ? (
-                <Image
-                  loader={({ src }) => src}
-                  src={item.path}
-                  alt="Album image"
-                  className="object-cover rounded-xl w-full h-full shadow-lg"
-                  width={ITEM_SIZE}
-                  height={ITEM_SIZE}
-                  priority
-                />
+                <div className="relative w-full h-full shadow-2xl rounded-2xl overflow-hidden">
+                  <Image
+                    loader={({ src }) => src}
+                    src={item.path}
+                    alt="Album image"
+                    className="object-cover"
+                    layout="fill"
+                    priority
+                  />
+                </div>
               ) : (
                 hasNextPage && (
                   <div className="flex items-center justify-center h-full">

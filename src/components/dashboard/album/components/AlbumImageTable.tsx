@@ -23,8 +23,17 @@ import {
   flexRender,
   OnChangeFn,
 } from "@tanstack/react-table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { useMemo, useState } from "react";
-import { AlbumImage } from "@/model/AlbumImage";
+import { AlbumImage, GallerySpotType } from "@/model/AlbumImage";
 import { Pagination } from "@/components/pagination/Pagination";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
@@ -32,6 +41,7 @@ import { TableSort } from "./TableSort";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { deleteAlbumImages } from "@/lib/deleteAlbumImages";
+import { updateGallerySpot } from "@/lib/updateGallerySpot";
 
 interface AlbumImageTableProps {
   data: AlbumImage[];
@@ -39,6 +49,7 @@ interface AlbumImageTableProps {
   pagination: { pageIndex: number; pageSize: number };
   onPaginationChange: OnChangeFn<{ pageIndex: number; pageSize: number }>;
   onDeleteSuccess?: () => void;
+  onSpotUpdateSuccess?: () => void;
   sort: string;
   setSort: (sort: string) => void;
   isLoading: boolean;
@@ -53,14 +64,25 @@ export default function AlbumImageTable({
   pagination,
   onPaginationChange,
   onDeleteSuccess,
+  onSpotUpdateSuccess,
   sort,
   setSort,
   isLoading,
   error,
 }: AlbumImageTableProps) {
   const { toast } = useToast();
+
+  // 앨범 이미지 삭제
   const [deleteIds, setDeleteIds] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // 갤러리 spot 업데이트
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [spotUpdateImage, setSpotUpdateImage] = useState<{
+    id: string;
+    currentSpot: GallerySpotType;
+    newSpot: GallerySpotType;
+  } | null>(null);
 
   const columns = useMemo(
     () => [
@@ -181,6 +203,48 @@ export default function AlbumImageTable({
             <p className="text-sm font-medium text-zinc-950 dark:text-white">
               {dayjs(date).locale("ko").format("YYYY-MM-DD HH:mm")}
             </p>
+          );
+        },
+      }),
+      columnHelper.accessor("gallerySpotType", {
+        header: () => (
+          <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+            갤러리내 위치
+          </p>
+        ),
+        cell: (info) => {
+          const image = info.row.original;
+          const [localValue, setLocalValue] = useState(image.gallerySpotType);
+
+          return (
+            <>
+              <Select
+                value={localValue}
+                onValueChange={(newValue) => {
+                  setSpotUpdateImage({
+                    id: image.id,
+                    currentSpot: image.gallerySpotType,
+                    newSpot: newValue as GallerySpotType,
+                  });
+                  setIsConfirmModalOpen(true);
+                }}
+              >
+                <SelectTrigger className="w-[120px] text-sm font-medium text-zinc-950 dark:text-white">
+                  <SelectValue placeholder="Select spot" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(GallerySpotType).map((spotType) => (
+                    <SelectItem
+                      key={spotType}
+                      value={spotType}
+                      className="text-sm"
+                    >
+                      {spotType}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </>
           );
         },
       }),
@@ -376,6 +440,60 @@ export default function AlbumImageTable({
           />
         </div>
       </div>
+
+      {/* 확인 모달 */}
+      {spotUpdateImage && (
+        <Dialog open={isConfirmModalOpen} onOpenChange={setIsConfirmModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>갤러리 위치 변경 확인</DialogTitle>
+              <DialogDescription className="text-zinc-700 dark:text-zinc-300">
+                {data.find((img) => img.id === spotUpdateImage.id)?.filename}의
+                위치를
+                <span className="mx-2 font-medium line-through text-zinc-500 dark:text-zinc-400">
+                  {spotUpdateImage.currentSpot}
+                </span>
+                →
+                <span className="mx-2 font-semibold bg-zinc-100/50 dark:bg-zinc-800/50 px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100">
+                  {spotUpdateImage.newSpot}
+                </span>
+                로 변경하시겠습니까?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsConfirmModalOpen(false);
+                  setSpotUpdateImage(null);
+                }}
+              >
+                취소
+              </Button>
+              <Button
+                onClick={async () => {
+                  try {
+                    await updateGallerySpot({
+                      imageId: spotUpdateImage.id,
+                      spotType: spotUpdateImage.newSpot,
+                    });
+
+                    toast({ title: "성공적으로 업데이트 되었습니다." });
+                    onSpotUpdateSuccess?.();
+                  } catch (error) {
+                    toast({ title: "업데이트 실패", variant: "destructive" });
+                  } finally {
+                    setIsConfirmModalOpen(false);
+                    setSpotUpdateImage(null);
+                  }
+                }}
+              >
+                확인
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </Card>
   );
 }

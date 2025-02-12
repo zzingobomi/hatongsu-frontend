@@ -48,7 +48,7 @@ export default function AlbumView(props: Props) {
     );
   };
 
-  const handleDeleteSuccess = () => {
+  const invalidateQuery = () => {
     queryClient.invalidateQueries({
       queryKey: ["albumImages", { ...pagination, sort }],
     });
@@ -59,6 +59,14 @@ export default function AlbumView(props: Props) {
         pageIndex: prev.pageIndex - 1,
       }));
     }
+  };
+
+  const handleDeleteSuccess = () => {
+    invalidateQuery();
+  };
+
+  const handleSpotUpdateSuccess = () => {
+    invalidateQuery();
   };
 
   useEffect(() => {
@@ -75,6 +83,7 @@ export default function AlbumView(props: Props) {
             pagination={pagination}
             onPaginationChange={handlePaginationChange}
             onDeleteSuccess={handleDeleteSuccess}
+            onSpotUpdateSuccess={handleSpotUpdateSuccess}
             sort={sort}
             setSort={setSort}
             isLoading={isLoading}

@@ -85,6 +85,7 @@ export default function AlbumGallery() {
             >
               {item ? (
                 <Image
+                  loader={({ src }) => src}
                   src={item.path}
                   alt="Album image"
                   className="object-cover rounded-lg w-full h-full"

@@ -42,6 +42,7 @@ import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { deleteAlbumImages } from "@/lib/deleteAlbumImages";
 import { updateGallerySpot } from "@/lib/updateGallerySpot";
+import clsx from "clsx";
 
 interface AlbumImageTableProps {
   data: AlbumImage[];
@@ -229,8 +230,25 @@ export default function AlbumImageTable({
                   setIsConfirmModalOpen(true);
                 }}
               >
-                <SelectTrigger className="w-[120px] text-sm font-medium text-zinc-950 dark:text-white">
-                  <SelectValue placeholder="Select spot" />
+                <SelectTrigger
+                  className={clsx(
+                    "w-[120px] text-sm font-medium text-zinc-950 dark:text-white transition-all",
+                    {
+                      "border border-blue-500 bg-blue-50/50 dark:border-blue-400 dark:bg-blue-900/30":
+                        localValue && localValue !== GallerySpotType.None,
+                      "hover:border-zinc-300 dark:hover:border-zinc-600":
+                        !localValue || localValue === GallerySpotType.None,
+                    }
+                  )}
+                >
+                  {localValue && localValue !== GallerySpotType.None ? (
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                      <SelectValue />
+                    </div>
+                  ) : (
+                    <SelectValue placeholder="Select spot" />
+                  )}
                 </SelectTrigger>
                 <SelectContent>
                   {Object.values(GallerySpotType).map((spotType) => (

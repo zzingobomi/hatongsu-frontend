@@ -31,6 +31,7 @@ export class ResourceManager implements IManager {
 
   public async LoadAssets(scene: Scene) {
     this.assetsManager = new AssetsManager(scene);
+    this.assetsManager.autoHideLoadingUI = false;
 
     const environmentFile = `${WORLD_NAME}.glb`;
     const playerFile = `${PLAYER_NAME}.glb`;

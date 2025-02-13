@@ -20,6 +20,7 @@ import { Inspector } from "@babylonjs/inspector";
 import { PlayerCamera } from "../core/engine/PlayerCamera";
 import { IManager, Managers } from "./Managers";
 import { WORLD_NAME } from "../data/const";
+import { LoadingScreen } from "../loading/LoadingScreen";
 
 export class WorldManager implements IManager {
   // babylon
@@ -28,17 +29,32 @@ export class WorldManager implements IManager {
   public scene: Scene;
   public playerCamera: PlayerCamera;
 
+  private loadingScreen: LoadingScreen;
+
   shadowGenerator: ShadowGenerator;
 
   constructor() {
     this.canvas = document.getElementById("world-canvas") as HTMLCanvasElement;
+    this.engine = new Engine(this.canvas, true, {
+      adaptToDeviceRatio: true,
+    });
+    this.loadingScreen = new LoadingScreen(this.engine);
   }
 
   public async Init() {
+    this.engine.displayLoadingUI();
+
     await this.initScene();
+    this.loadingScreen.updateProgress(0.1);
+
     await this.initEnvironment();
+    this.loadingScreen.updateProgress(0.2);
+
     await this.initResource();
+    this.loadingScreen.updateProgress(0.8);
+
     this.initGallerySpot();
+    this.loadingScreen.updateProgress(1.0);
 
     window.onresize = () => {
       this.engine.resize();
@@ -59,6 +75,8 @@ export class WorldManager implements IManager {
     });
 
     this.render();
+
+    this.engine.hideLoadingUI();
   }
 
   public async Dispose() {
@@ -72,10 +90,6 @@ export class WorldManager implements IManager {
   }
 
   private async initScene() {
-    this.engine = new Engine(this.canvas, true, {
-      adaptToDeviceRatio: true,
-    });
-
     this.scene = new Scene(this.engine);
     this.playerCamera = new PlayerCamera(this.scene);
   }

@@ -9,9 +9,9 @@ import { useChatStore } from "@/app/stores/ChatStore";
 import { PlayerSchema } from "../schema/PlayerSchema";
 import { GalleryRoomState } from "../schema/GalleryRoomState";
 import { SERVER_NICKNAME } from "../data/const";
-import { Managers } from "./Managers";
+import { IManager, Managers } from "./Managers";
 
-export class EventServerManager {
+export class EventServerManager implements IManager {
   private client: Colyseus.Client;
   private room: Colyseus.Room<GalleryRoomState>;
   private sessionId: string;

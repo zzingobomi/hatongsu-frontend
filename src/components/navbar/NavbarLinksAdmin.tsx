@@ -21,6 +21,7 @@ import {
 import { signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { UserRole } from "@/lib/user.role";
 
 export default function HeaderLinks() {
   const user = useContext(UserContext);
@@ -32,7 +33,7 @@ export default function HeaderLinks() {
     { href: "/dashboard/album", label: "Album" },
     { href: "/dashboard/chart", label: "Chart" },
     { href: "/dashboard/users", label: "Users List" },
-    { href: "/dashboard/settings", label: "Profile Settings" },
+    //{ href: "/dashboard/settings", label: "Profile Settings" },
     { href: "/dashboard/upload", label: "Image Upload" },
   ];
 
@@ -59,24 +60,43 @@ export default function HeaderLinks() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56 p-2 space-y-2">
-          {menuItems.map((item) => (
-            <Link key={item.href} href={item.href} className="block">
-              <Button
-                variant="outline"
+          {menuItems.map((item) => {
+            const isDisabled =
+              item.label === "Image Upload" && user?.role !== UserRole.ADMIN;
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={(e) => {
+                  if (isDisabled) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }
+                }}
                 className={cn(
-                  "w-full justify-start",
-                  pathname === item.href &&
-                    "bg-zinc-100 dark:bg-zinc-800 font-medium"
+                  "block",
+                  isDisabled ? "opacity-30 cursor-not-allowed" : ""
                 )}
               >
-                {item.label}
-              </Button>
-            </Link>
-          ))}
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start",
+                    pathname === item.href &&
+                      "bg-zinc-100 dark:bg-zinc-800 font-medium",
+                    isDisabled ? "cursor-not-allowed pointer-events-none" : ""
+                  )}
+                >
+                  {item.label}
+                </Button>
+              </Link>
+            );
+          })}
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Button
+      {/* <Button
         variant="outline"
         className="flex h-9 min-w-9 cursor-pointer rounded-full border-zinc-200 p-0 text-xl text-zinc-950 dark:border-zinc-800 dark:text-white md:min-h-10 md:min-w-10"
         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -86,7 +106,7 @@ export default function HeaderLinks() {
         ) : (
           <HiOutlineSun className="h-5 w-5 stroke-2" />
         )}
-      </Button>
+      </Button> */}
 
       <Button
         onClick={(e) => handleSignOut(e)}

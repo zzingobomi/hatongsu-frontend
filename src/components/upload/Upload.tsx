@@ -6,6 +6,10 @@ import { useDropzone } from "react-dropzone";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
+import { useToast } from "@/hooks/use-toast";
+import { UserRole } from "@/lib/user.role";
+import { useRouter } from "next/navigation";
 
 type FileWithPreview = File & {
   preview: string;
@@ -14,6 +18,9 @@ type FileWithPreview = File & {
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
 export default function Upload() {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const { toast } = useToast();
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [totalSize, setTotalSize] = useState(0);
 
@@ -34,7 +41,10 @@ export default function Upload() {
       );
 
       if (newTotalSize > MAX_FILE_SIZE) {
-        alert("총 파일 크기가 100MB를 초과했습니다.");
+        toast({
+          title: "총 파일 크기가 100MB를 초과했습니다.",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -58,6 +68,10 @@ export default function Upload() {
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/file/uploads`,
         {
           method: "POST",
+          credentials: "include",
+          headers: {
+            Authorization: `Bearer ${session?.accessToken}`,
+          },
           body: formData,
         }
       );
@@ -69,18 +83,18 @@ export default function Upload() {
       return response.json();
     },
     onSuccess: (data) => {
-      console.log("업로드 성공:", data);
+      toast({ title: "성공적으로 업로드 되었습니다." });
       setFiles([]);
     },
     onError: (error) => {
-      console.error("업로드 실패:", error);
-      alert("파일 업로드에 실패했습니다.");
+      toast({ title: "업로드 실패", variant: "destructive" });
+      console.error(error);
     },
   });
 
   const handleUpload = () => {
     if (files.length === 0) {
-      alert("업로드할 파일을 선택해주세요.");
+      toast({ title: "업로드할 파일을 선택해주세요.", variant: "destructive" });
       return;
     }
     uploadMutation.mutate(files);
@@ -115,6 +129,12 @@ export default function Upload() {
   useEffect(() => {
     return () => files.forEach((file) => URL.revokeObjectURL(file.preview));
   }, [files]);
+
+  useEffect(() => {
+    if (session?.user?.role !== UserRole.ADMIN) {
+      router.push("/dashboard/main");
+    }
+  }, [session, router]);
 
   return (
     <Card className={"border-zinc-200 p-6 dark:border-zinc-800 w-full"}>

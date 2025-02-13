@@ -98,7 +98,7 @@ export function SidebarLinks(props: SidebarLinksProps) {
       }
     });
   };
-  //  BRAND
+
   return <>{createLinks(routes)}</>;
 }
 

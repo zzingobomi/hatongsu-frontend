@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import {
   renderThumb,
@@ -8,21 +7,17 @@ import {
   renderView,
 } from "@/components/scrollbar/Scrollbar";
 import Links from "@/components/sidebar/components/Links";
-import SidebarCard from "@/components/sidebar/components/SidebarCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import React, { PropsWithChildren, useContext } from "react";
 import { Scrollbars } from "react-custom-scrollbars-2";
 import { HiX } from "react-icons/hi";
-import { HiBolt } from "react-icons/hi2";
 import { HiOutlineArrowRightOnRectangle } from "react-icons/hi2";
-
+import { signOut } from "next-auth/react";
 import { UserContext } from "@/contexts/layout";
-
 import { IRoute } from "@/@types/types";
+import { UserRole } from "@/lib/user.role";
 
 export interface SidebarProps extends PropsWithChildren {
   routes: IRoute[];
@@ -31,14 +26,27 @@ export interface SidebarProps extends PropsWithChildren {
 
 function Sidebar(props: SidebarProps) {
   const { routes } = props;
-
   const user = useContext(UserContext);
+
+  // 관리자가 아니라면 이미지 업로드 메뉴를 비활성화
+  const modifiedRoutes = routes.map((route) => {
+    if (route.name === "Image Upload" && user?.role !== UserRole.ADMIN) {
+      return { ...route, disabled: true };
+    }
+    return route;
+  });
+
   const handleSignOut = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    // e.preventDefault();
-    // supabase.auth.signOut();
-    // router.push('/dashboard/signin');
+    try {
+      await signOut({
+        redirect: true,
+        callbackUrl: "/",
+      });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
-  // SIDEBAR
+
   return (
     <div
       className={`lg:!z-99 fixed !z-[99] min-h-full w-[300px] transition-all md:!z-[99] xl:!z-0 ${
@@ -80,28 +88,22 @@ function Sidebar(props: SidebarProps) {
               <div className="mb-8 mt-8 h-px bg-zinc-200 dark:bg-white/10" />
               {/* Nav item */}
               <ul>
-                <Links routes={routes} />
+                <Links routes={modifiedRoutes} />
               </ul>
             </div>
             {/* Free Horizon Card    */}
             <div className="mb-9 mt-7">
               {/* Sidebar profile info */}
               <div className="mt-5 flex w-full items-center rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-                <a href="/dashboard/dashboard/settings">
-                  <Avatar className="min-h-10 min-w-10">
-                    <AvatarImage src={user?.profile} />
-                    <AvatarFallback className="font-bold dark:text-zinc-950">
-                      {props.user?.nickname
-                        ? props.user.nickname.charAt(0)
-                        : ""}
-                    </AvatarFallback>
-                  </Avatar>
-                </a>
-                <a href="/dashboard/settings">
-                  <p className="ml-2 mr-3 flex items-center text-sm font-semibold leading-none text-zinc-950 dark:text-white">
-                    {user?.nickname || "User"}
-                  </p>
-                </a>
+                <Avatar className="min-h-10 min-w-10">
+                  <AvatarImage src={user?.profile} />
+                  <AvatarFallback className="font-bold dark:text-zinc-950">
+                    {props.user?.nickname ? props.user.nickname.charAt(0) : ""}
+                  </AvatarFallback>
+                </Avatar>
+                <p className="ml-2 mr-3 flex items-center text-sm font-semibold leading-none text-zinc-950 dark:text-white">
+                  {user?.nickname || "User"}
+                </p>
                 <Button
                   onClick={(e) => handleSignOut(e)}
                   variant="outline"
@@ -123,7 +125,5 @@ function Sidebar(props: SidebarProps) {
     </div>
   );
 }
-
-// PROPS
 
 export default Sidebar;

@@ -43,6 +43,8 @@ import { useToast } from "@/hooks/use-toast";
 import { deleteAlbumImages } from "@/lib/deleteAlbumImages";
 import { updateGallerySpot } from "@/lib/updateGallerySpot";
 import clsx from "clsx";
+import { useSession } from "next-auth/react";
+import { UserRole } from "@/lib/user.role";
 
 interface AlbumImageTableProps {
   data: AlbumImage[];
@@ -71,6 +73,7 @@ export default function AlbumImageTable({
   isLoading,
   error,
 }: AlbumImageTableProps) {
+  const { data: session } = useSession();
   const { toast } = useToast();
 
   // 앨범 이미지 삭제
@@ -85,8 +88,8 @@ export default function AlbumImageTable({
     newSpot: GallerySpotType;
   } | null>(null);
 
-  const columns = useMemo(
-    () => [
+  const columns = useMemo(() => {
+    const baseColumns = [
       columnHelper.accessor("path", {
         header: () => (
           <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
@@ -122,44 +125,10 @@ export default function AlbumImageTable({
           </p>
         ),
       }),
-      columnHelper.accessor("dateTime", {
-        header: () => (
-          <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-            촬영 시간
-          </p>
-        ),
-        cell: (info) => {
-          const date = info.getValue();
-          if (!date) return "-";
-
-          return (
-            <p className="text-sm font-medium text-zinc-950 dark:text-white">
-              {dayjs(date).locale("ko").format("YYYY-MM-DD HH:mm")}
-            </p>
-          );
-        },
-      }),
       columnHelper.accessor("dateTimeOriginal", {
         header: () => (
           <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
             원본 촬영 시간
-          </p>
-        ),
-        cell: (info) => {
-          const date = info.getValue();
-          if (!date) return null;
-
-          return (
-            <p className="text-sm font-medium text-zinc-950 dark:text-white">
-              {dayjs(date).locale("ko").format("YYYY-MM-DD HH:mm")}
-            </p>
-          );
-        },
-      }),
-      columnHelper.accessor("dateTimeDigitized", {
-        header: () => (
-          <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-            디지털화 시간
           </p>
         ),
         cell: (info) => {
@@ -207,93 +176,109 @@ export default function AlbumImageTable({
           );
         },
       }),
-      columnHelper.accessor("gallerySpotType", {
-        header: () => (
-          <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-            갤러리내 위치
-          </p>
-        ),
-        cell: (info) => {
-          const image = info.row.original;
-          const [localValue, setLocalValue] = useState(image.gallerySpotType);
+    ];
 
-          return (
-            <>
-              <Select
-                value={localValue}
-                onValueChange={(newValue) => {
-                  setSpotUpdateImage({
-                    id: image.id,
-                    currentSpot: image.gallerySpotType,
-                    newSpot: newValue as GallerySpotType,
-                  });
-                  setIsConfirmModalOpen(true);
-                }}
-              >
-                <SelectTrigger
-                  className={clsx(
-                    "w-[120px] text-sm font-medium text-zinc-950 dark:text-white transition-all",
-                    {
-                      "border border-blue-500 bg-blue-50/50 dark:border-blue-400 dark:bg-blue-900/30":
-                        localValue && localValue !== GallerySpotType.None,
-                      "hover:border-zinc-300 dark:hover:border-zinc-600":
-                        !localValue || localValue === GallerySpotType.None,
-                    }
-                  )}
-                >
-                  {localValue && localValue !== GallerySpotType.None ? (
-                    <div className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                      <SelectValue />
-                    </div>
-                  ) : (
-                    <SelectValue placeholder="Select spot" />
-                  )}
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.values(GallerySpotType).map((spotType) => (
-                    <SelectItem
-                      key={spotType}
-                      value={spotType}
-                      className="text-sm"
+    if (session?.user?.role === UserRole.ADMIN) {
+      baseColumns.push(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        columnHelper.accessor<GallerySpotType, "gallerySpotType">(
+          "gallerySpotType",
+          {
+            header: () => (
+              <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                갤러리내 위치
+              </p>
+            ),
+            cell: (info) => {
+              const image = info.row.original;
+              const [localValue, setLocalValue] = useState(
+                image.gallerySpotType
+              );
+
+              return (
+                <>
+                  <Select
+                    value={localValue}
+                    onValueChange={(newValue) => {
+                      setSpotUpdateImage({
+                        id: image.id,
+                        currentSpot: image.gallerySpotType,
+                        newSpot: newValue as GallerySpotType,
+                      });
+                      setIsConfirmModalOpen(true);
+                    }}
+                  >
+                    <SelectTrigger
+                      className={clsx(
+                        "w-[120px] text-sm font-medium text-zinc-950 dark:text-white transition-all",
+                        {
+                          "border border-blue-500 bg-blue-50/50 dark:border-blue-400 dark:bg-blue-900/30":
+                            localValue && localValue !== GallerySpotType.None,
+                          "hover:border-zinc-300 dark:hover:border-zinc-600":
+                            !localValue || localValue === GallerySpotType.None,
+                        }
+                      )}
                     >
-                      {spotType}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </>
-          );
-        },
-      }),
-      columnHelper.accessor("checked", {
-        id: "checked",
-        header: () => (
-          <div className="pr-4">
-            <Checkbox
-              checked={deleteIds.length === data.length && data.length > 0}
-              onCheckedChange={(checked) => {
-                if (checked) {
-                  setDeleteIds(data.map((item) => item.id));
-                } else {
-                  setDeleteIds([]);
-                }
-              }}
-            />
-          </div>
-        ),
-        cell: (info: any) => (
-          <div>
-            <Checkbox
-              checked={deleteIds.includes(info.row.original.id)}
-              onCheckedChange={() => toggleSelect(info.row.original.id)}
-            />
-          </div>
-        ),
-      }),
-    ],
-    [deleteIds, data]
-  );
+                      {localValue && localValue !== GallerySpotType.None ? (
+                        <div className="flex items-center gap-2">
+                          <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                          <SelectValue />
+                        </div>
+                      ) : (
+                        <SelectValue placeholder="Select spot" />
+                      )}
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.values(GallerySpotType).map((spotType) => (
+                        <SelectItem
+                          key={spotType}
+                          value={spotType}
+                          className="text-sm"
+                        >
+                          {spotType}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </>
+              );
+            },
+          }
+        )
+      );
+
+      baseColumns.push(
+        columnHelper.accessor("checked", {
+          id: "checked",
+          header: () => (
+            <div className="pr-4">
+              <Checkbox
+                checked={deleteIds.length === data.length && data.length > 0}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setDeleteIds(data.map((item) => item.id));
+                  } else {
+                    setDeleteIds([]);
+                  }
+                }}
+              />
+            </div>
+          ),
+          cell: (info: any) => (
+            <div>
+              <Checkbox
+                checked={deleteIds.includes(info.row.original.id)}
+                onCheckedChange={() => toggleSelect(info.row.original.id)}
+              />
+            </div>
+          ),
+        })
+      );
+    }
+
+    return baseColumns;
+  }, [session, deleteIds, data]);
 
   const handlePerPageChange = (value: string) => {
     const newPageSize = parseInt(value, 10);
@@ -362,17 +347,19 @@ export default function AlbumImageTable({
     >
       <div className="p-4 flex justify-between items-center">
         <TableSort sort={sort} onSortChange={setSort} />
-        <button
-          onClick={handleDelete}
-          disabled={deleteIds.length === 0 || isDeleting}
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
-        >
-          {isDeleting
-            ? "삭제 중..."
-            : deleteIds.length > 0
-            ? `선택 항목 삭제 (${deleteIds.length})`
-            : "삭제하기"}
-        </button>
+        {session?.user?.role === UserRole.ADMIN && (
+          <button
+            onClick={handleDelete}
+            disabled={deleteIds.length === 0 || isDeleting}
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+          >
+            {isDeleting
+              ? "삭제 중..."
+              : deleteIds.length > 0
+              ? `선택 항목 삭제 (${deleteIds.length})`
+              : "삭제하기"}
+          </button>
+        )}
       </div>
       <div className="overflow-x-scroll xl:overflow-x-hidden">
         <Table className="w-full">

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import AuthSession from "./_component/AuthSession";
+import { ViewTransitions } from "next-view-transitions";
 import "./globals.css";
 import RQProvider from "./_component/RQProvider";
 
@@ -17,12 +18,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
-      <body className={inter.className}>
-        <AuthSession>
-          <RQProvider>{children}</RQProvider>
-        </AuthSession>
-      </body>
-    </html>
+    <ViewTransitions>
+      <html lang="ko">
+        <body className={inter.className}>
+          <AuthSession>
+            <RQProvider>{children}</RQProvider>
+          </AuthSession>
+        </body>
+      </html>
+    </ViewTransitions>
   );
 }

@@ -8,7 +8,7 @@ pnpm dlx shadcn@latest add button
 
 ##### TODO
 
-- 관리자 아니면 upload 비활성화 시키기
+- 사파리 브라우저 16버전에서는 tailwind 레이아웃 문제가 있는듯.. 어떻게 해결할까?
 - hydration 에러 수정하기
 
 ##### Credits

@@ -176,106 +176,110 @@ export default function AlbumImageTable({
           );
         },
       }),
-    ];
+      columnHelper.accessor("gallerySpotType", {
+        header: () => (
+          <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+            갤러리내 위치
+          </p>
+        ),
+        cell: (info) => {
+          const image = info.row.original;
+          const [localValue, setLocalValue] = useState(image.gallerySpotType);
 
-    if (session?.user?.role === UserRole.ADMIN) {
-      baseColumns.push(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        columnHelper.accessor<GallerySpotType, "gallerySpotType">(
-          "gallerySpotType",
-          {
-            header: () => (
-              <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-                갤러리내 위치
-              </p>
-            ),
-            cell: (info) => {
-              const image = info.row.original;
-              const [localValue, setLocalValue] = useState(
-                image.gallerySpotType
-              );
-
-              return (
-                <>
-                  <Select
-                    value={localValue}
-                    onValueChange={(newValue) => {
-                      setSpotUpdateImage({
-                        id: image.id,
-                        currentSpot: image.gallerySpotType,
-                        newSpot: newValue as GallerySpotType,
-                      });
-                      setIsConfirmModalOpen(true);
-                    }}
-                  >
-                    <SelectTrigger
-                      className={clsx(
-                        "w-[120px] text-sm font-medium text-zinc-950 dark:text-white transition-all",
-                        {
-                          "border border-blue-500 bg-blue-50/50 dark:border-blue-400 dark:bg-blue-900/30":
-                            localValue && localValue !== GallerySpotType.None,
-                          "hover:border-zinc-300 dark:hover:border-zinc-600":
-                            !localValue || localValue === GallerySpotType.None,
-                        }
-                      )}
-                    >
-                      {localValue && localValue !== GallerySpotType.None ? (
-                        <div className="flex items-center gap-2">
-                          <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                          <SelectValue />
-                        </div>
-                      ) : (
-                        <SelectValue placeholder="Select spot" />
-                      )}
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.values(GallerySpotType).map((spotType) => (
-                        <SelectItem
-                          key={spotType}
-                          value={spotType}
-                          className="text-sm"
-                        >
-                          {spotType}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </>
-              );
-            },
+          if (session?.user?.role !== UserRole.ADMIN) {
+            return (
+              <div className="opacity-50 cursor-not-allowed">
+                <div className="w-[120px] text-sm font-medium text-zinc-950 dark:text-white px-3 py-2 border rounded-md bg-zinc-100/50 dark:bg-zinc-800/50">
+                  {image.gallerySpotType}
+                </div>
+              </div>
+            );
           }
-        )
-      );
 
-      baseColumns.push(
-        columnHelper.accessor("checked", {
-          id: "checked",
-          header: () => (
-            <div className="pr-4">
-              <Checkbox
-                checked={deleteIds.length === data.length && data.length > 0}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setDeleteIds(data.map((item) => item.id));
-                  } else {
-                    setDeleteIds([]);
-                  }
+          return (
+            <>
+              <Select
+                value={localValue}
+                onValueChange={(newValue) => {
+                  setSpotUpdateImage({
+                    id: image.id,
+                    currentSpot: image.gallerySpotType,
+                    newSpot: newValue as GallerySpotType,
+                  });
+                  setIsConfirmModalOpen(true);
                 }}
-              />
-            </div>
-          ),
-          cell: (info: any) => (
-            <div>
-              <Checkbox
-                checked={deleteIds.includes(info.row.original.id)}
-                onCheckedChange={() => toggleSelect(info.row.original.id)}
-              />
-            </div>
-          ),
-        })
-      );
-    }
+              >
+                <SelectTrigger
+                  className={clsx(
+                    "w-[120px] text-sm font-medium text-zinc-950 dark:text-white transition-all",
+                    {
+                      "border border-blue-500 bg-blue-50/50 dark:border-blue-400 dark:bg-blue-900/30":
+                        localValue && localValue !== GallerySpotType.None,
+                      "hover:border-zinc-300 dark:hover:border-zinc-600":
+                        !localValue || localValue === GallerySpotType.None,
+                    }
+                  )}
+                >
+                  {localValue && localValue !== GallerySpotType.None ? (
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                      <SelectValue />
+                    </div>
+                  ) : (
+                    <SelectValue placeholder="Select spot" />
+                  )}
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(GallerySpotType).map((spotType) => (
+                    <SelectItem
+                      key={spotType}
+                      value={spotType}
+                      className="text-sm"
+                    >
+                      {spotType}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </>
+          );
+        },
+      }),
+      columnHelper.accessor("checked", {
+        id: "checked",
+        header: () => (
+          <div className="pr-4">
+            <Checkbox
+              checked={deleteIds.length === data.length && data.length > 0}
+              onCheckedChange={(checked) => {
+                if (session?.user?.role !== UserRole.ADMIN) return;
+                if (checked) {
+                  setDeleteIds(data.map((item) => item.id));
+                } else {
+                  setDeleteIds([]);
+                }
+              }}
+            />
+          </div>
+        ),
+        cell: (info: any) => (
+          <div
+            className={clsx({
+              "opacity-30": session?.user?.role !== UserRole.ADMIN,
+            })}
+          >
+            <Checkbox
+              checked={deleteIds.includes(info.row.original.id)}
+              onCheckedChange={() => {
+                if (session?.user?.role !== UserRole.ADMIN) return;
+                toggleSelect(info.row.original.id);
+              }}
+              disabled={session?.user?.role !== UserRole.ADMIN}
+            />
+          </div>
+        ),
+      }),
+    ];
 
     return baseColumns;
   }, [session, deleteIds, data]);
@@ -347,7 +351,7 @@ export default function AlbumImageTable({
     >
       <div className="p-4 flex justify-between items-center">
         <TableSort sort={sort} onSortChange={setSort} />
-        {session?.user?.role === UserRole.ADMIN && (
+        {session?.user?.role === UserRole.ADMIN ? (
           <button
             onClick={handleDelete}
             disabled={deleteIds.length === 0 || isDeleting}
@@ -359,6 +363,10 @@ export default function AlbumImageTable({
               ? `선택 항목 삭제 (${deleteIds.length})`
               : "삭제하기"}
           </button>
+        ) : (
+          <div className="opacity-30 text-sm text-zinc-500 dark:text-zinc-400">
+            관리자만 삭제 및 위치 변경 가능
+          </div>
         )}
       </div>
       <div className="overflow-x-scroll xl:overflow-x-hidden">

@@ -44,7 +44,10 @@ export default function CountDateChart() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/album/statistic/count-date?startDate=${startDate}&endDate=${endDate}`
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/album/statistic/count-date?startDate=${startDate}&endDate=${endDate}`,
+        {
+          credentials: "include",
+        }
       );
       const data: CountDateResponse = await response.json();
 

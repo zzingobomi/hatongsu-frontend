@@ -13,6 +13,7 @@ pnpm dlx shadcn@latest add button
 ##### TODO
 
 - 사파리 브라우저 16버전에서는 tailwind 레이아웃 문제가 있는듯.. 어떻게 해결할까?
+  - production 빌드에서는 레이아웃 문제가 없다.. dev 빌드에서만 일어나는 현상인듯
 - hydration 에러 수정하기
 
 ##### Credits

@@ -35,7 +35,7 @@ export const getAlbumImagesFerrisFirst = async ({
     url.searchParams.append("sort", sort);
   }
 
-  const response = await fetch(url.toString());
+  const response = await fetch(url.toString(), { credentials: "include" });
 
   if (!response.ok) {
     throw new Error("Failed to fetch album images ferris first");

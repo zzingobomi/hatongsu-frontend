@@ -24,7 +24,7 @@ export const getAlbumImageFerrisNext = async (
   url.searchParams.append("id", id);
   url.searchParams.append("skip", skip.toString());
 
-  const response = await fetch(url.toString());
+  const response = await fetch(url.toString(), { credentials: "include" });
 
   if (!response.ok) {
     throw new Error("Failed to fetch album images");

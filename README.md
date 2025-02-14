@@ -1,5 +1,9 @@
 ### Hatongsu frontend
 
+### Roadmap
+
+- 동영상 업로드 및 전시회장에서 동영상 시청
+
 ##### Shadcn UI 설치
 
 ```bash

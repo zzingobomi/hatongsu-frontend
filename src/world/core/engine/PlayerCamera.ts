@@ -36,7 +36,7 @@ export class PlayerCamera {
     this.camera.fov = 0.7;
     this.camera.parent = this.yTilt;
 
-    this.camera.attachControl();
+    //this.camera.attachControl();
 
     this.scene.activeCamera = this.camera;
   }

@@ -22,6 +22,10 @@ export enum KeyboardCode {
   KEY_D = 68,
   KEY_SHIFT = 16,
   KEY_SPACE = 32,
+  ARROW_UP = 38,
+  ARROW_DOWN = 40,
+  ARROW_LEFT = 37,
+  ARROW_RIGHT = 39,
 }
 
 export class InputController {
@@ -100,10 +104,16 @@ export class InputController {
 
   private updateFromKeyboard() {
     if (this.keyboard) {
-      if (this.keyboard.getInput(KeyboardCode.KEY_W)) {
+      if (
+        this.keyboard.getInput(KeyboardCode.KEY_W) ||
+        this.keyboard.getInput(KeyboardCode.ARROW_UP)
+      ) {
         this.vertical = Scalar.Lerp(this.vertical, 1, 0.2);
         this.verticalAxis = 1;
-      } else if (this.keyboard.getInput(KeyboardCode.KEY_S)) {
+      } else if (
+        this.keyboard.getInput(KeyboardCode.KEY_S) ||
+        this.keyboard.getInput(KeyboardCode.ARROW_DOWN)
+      ) {
         this.vertical = Scalar.Lerp(this.vertical, -1, 0.2);
         this.verticalAxis = -1;
       } else {
@@ -111,10 +121,16 @@ export class InputController {
         this.verticalAxis = 0;
       }
 
-      if (this.keyboard.getInput(KeyboardCode.KEY_A)) {
+      if (
+        this.keyboard.getInput(KeyboardCode.KEY_A) ||
+        this.keyboard.getInput(KeyboardCode.ARROW_LEFT)
+      ) {
         this.horizontal = Scalar.Lerp(this.horizontal, -1, 0.2);
         this.horizontalAxis = -1;
-      } else if (this.keyboard.getInput(KeyboardCode.KEY_D)) {
+      } else if (
+        this.keyboard.getInput(KeyboardCode.KEY_D) ||
+        this.keyboard.getInput(KeyboardCode.ARROW_RIGHT)
+      ) {
         this.horizontal = Scalar.Lerp(this.horizontal, 1, 0.2);
         this.horizontalAxis = 1;
       } else {

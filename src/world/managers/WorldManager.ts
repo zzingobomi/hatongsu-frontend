@@ -114,15 +114,23 @@ export class WorldManager implements IManager {
       this.scene
     );
     light.position = new Vector3(0, 30, 0);
-    light.intensity = 1.5;
+    light.intensity = 2.5;
     light.autoCalcShadowZBounds = true;
 
     const light2 = new DirectionalLight(
       "DirectionalLight2",
-      new Vector3(-1, -1, 0),
+      new Vector3(1, -1, 0),
       this.scene
     );
     light2.position = new Vector3(30, 30, 0);
+    light2.intensity = 1.0;
+
+    const light3 = new DirectionalLight(
+      "DirectionalLight2",
+      new Vector3(-3, -1, 0),
+      this.scene
+    );
+    light2.position = new Vector3(0, 10, 0);
     light2.intensity = 1.0;
 
     // point light

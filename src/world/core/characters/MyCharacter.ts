@@ -10,6 +10,9 @@ import { fromBabylonQuaternion, fromBabylonVector3 } from "@/world/utils/Utils";
 import { CharacterEntity } from "./CharacterEntity";
 
 export class MyCharacter extends CharacterEntity {
+  private static readonly CLAMPED_X: number = 110;
+  private static readonly CLAMPED_Z: number = 110;
+
   private static readonly GRAVITY: number = -2.8;
   private static readonly JUMP_FORCE: number = 0.8;
 
@@ -135,6 +138,17 @@ export class MyCharacter extends CharacterEntity {
     this.rootMesh.moveWithCollisions(
       this.moveDirection.addInPlace(this.gravity)
     );
+
+    const clampedX = Math.max(
+      -MyCharacter.CLAMPED_X,
+      Math.min(MyCharacter.CLAMPED_X, this.rootMesh.position.x)
+    );
+    const clampedZ = Math.max(
+      -MyCharacter.CLAMPED_Z,
+      Math.min(MyCharacter.CLAMPED_Z, this.rootMesh.position.z)
+    );
+
+    this.rootMesh.position.set(clampedX, this.rootMesh.position.y, clampedZ);
 
     if (this.isGrounded()) {
       this.gravity.y = 0;

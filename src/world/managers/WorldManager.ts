@@ -12,9 +12,9 @@ import {
   Vector3,
   ShadowGenerator,
   AbstractMesh,
-  AxesViewer,
   Mesh,
-  PointLight,
+  MeshBuilder,
+  Quaternion,
 } from "@babylonjs/core";
 import { Inspector } from "@babylonjs/inspector";
 import { PlayerCamera } from "../core/engine/PlayerCamera";
@@ -159,6 +159,33 @@ export class WorldManager implements IManager {
       WORLD_NAME
     ).instantiateModelsToScene((sourceName) => sourceName);
     const env = worldInstance.rootNodes[0] as AbstractMesh;
+
+    // 조각상 충돌박스 생성
+    // TODO: 추후 블렌더를 좀 더 잘 다루게 되면, 축 계산 다시 해보기
+    const statue = this.scene.getTransformNodeByName(
+      "BluffTitler Picture Layer 7_11"
+    );
+    if (statue) {
+      const { position: statuePos, rotationQuaternion: statueQuat } = statue;
+      const outer = MeshBuilder.CreateBox(
+        "statue",
+        { width: 2, depth: 1.5, height: 10 },
+        this.scene
+      );
+      outer.isVisible = false;
+      outer.isPickable = false;
+      outer.checkCollisions = true;
+      outer.position = new Vector3(-statuePos.x, 0, statuePos.z);
+      if (statueQuat) {
+        outer.rotationQuaternion = new Quaternion(
+          statueQuat.x,
+          -statueQuat.y,
+          statueQuat.z,
+          statueQuat.w
+        );
+      }
+    }
+
     env.getChildMeshes().forEach((m) => {
       this.shadowGenerator.addShadowCaster(m);
       m.receiveShadows = true;

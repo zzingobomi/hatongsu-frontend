@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import React from "react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Input } from "../ui/input";
 import OauthSignIn from "./OauthSignIn";
@@ -19,6 +18,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { ERROR_MESSAGES } from "./const/ErrorMessage";
 
 const signUpSchema = z
   .object({
@@ -33,9 +33,9 @@ const signUpSchema = z
   });
 
 export default function SignUp() {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [signupCompleted, setSignupCompleted] = useState(false);
+  const [error, setError] = useState<keyof typeof ERROR_MESSAGES | null>(null);
 
   const form = useForm<z.infer<typeof signUpSchema>>({
     resolver: zodResolver(signUpSchema),
@@ -68,7 +68,10 @@ export default function SignUp() {
       );
 
       if (!response.ok) {
-        throw new Error("회원가입 실패");
+        const errorData = await response.json();
+        setError(errorData.message);
+        setIsSubmitting(false);
+        return;
       }
 
       setSignupCompleted(true);
@@ -161,6 +164,11 @@ export default function SignUp() {
                 </FormItem>
               )}
             />
+            {error && (
+              <div className="text-red-500 text-sm text-center">
+                {error && ERROR_MESSAGES[error]}
+              </div>
+            )}
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? (
                 <svg

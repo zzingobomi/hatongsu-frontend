@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import React from "react";
 import {
   Form,
@@ -19,6 +19,7 @@ import { signIn } from "next-auth/react";
 import OauthSignIn from "./OauthSignIn";
 import Separator from "./Separator";
 import Link from "next/link";
+import { ERROR_MESSAGES } from "./const/ErrorMessage";
 
 const loginSchema = z.object({
   email: z.string().trim().email("유효한 이메일 주소를 입력해주세요"),
@@ -26,7 +27,9 @@ const loginSchema = z.object({
 });
 
 export default function PasswordSignIn() {
-  const router = useRouter();
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error");
+  const code = searchParams.get("code") as keyof typeof ERROR_MESSAGES | null;
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -37,17 +40,11 @@ export default function PasswordSignIn() {
   });
 
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
-    try {
-      await signIn("credentials", {
-        username: data.email,
-        password: data.password,
-        redirect: false,
-      });
-
-      router.replace("/dashboard/main");
-    } catch (err) {
-      console.error(err);
-    }
+    await signIn("credentials", {
+      username: data.email,
+      password: data.password,
+      redirectTo: "/dashboard/main",
+    });
   };
 
   return (
@@ -89,6 +86,11 @@ export default function PasswordSignIn() {
               </FormItem>
             )}
           />
+          {error && code && (
+            <div className="text-red-500 text-sm text-center">
+              {code && ERROR_MESSAGES[code]}
+            </div>
+          )}
           <Button
             type="submit"
             className="w-full"

@@ -1,8 +1,15 @@
-import NextAuth, { Session } from "next-auth";
+import NextAuth, { CredentialsSignin, Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { User } from "./model/User";
+
+class LoginError extends CredentialsSignin {
+  constructor(code: string) {
+    super();
+    this.code = code;
+  }
+}
 
 export const {
   handlers: { GET, POST },
@@ -38,7 +45,8 @@ export const {
           );
 
           if (!response.ok) {
-            return null;
+            const errorData = await response.json();
+            throw new LoginError(errorData.message);
           }
 
           const { accessToken, refreshToken } = await response.json();
@@ -65,6 +73,9 @@ export const {
             userData,
           };
         } catch (error) {
+          if (error instanceof LoginError) {
+            throw error;
+          }
           console.error("Authentication error:", error);
           return null;
         }

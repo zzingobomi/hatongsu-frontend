@@ -364,7 +364,7 @@ export default function AlbumImageTable({
               : "삭제하기"}
           </button>
         ) : (
-          <div className="opacity-30 text-sm text-zinc-500 dark:text-zinc-400">
+          <div className="hidden sm:block opacity-30 text-sm text-zinc-500 dark:text-zinc-400">
             관리자만 삭제 및 위치 변경 가능
           </div>
         )}

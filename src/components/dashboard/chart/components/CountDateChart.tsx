@@ -123,8 +123,8 @@ export default function CountDateChart() {
 
   return (
     <Card className={"border-zinc-200 p-6 dark:border-zinc-800 w-full"}>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-2 sm:gap-0">
+        <div className="flex items-center gap-3 self-start">
           <div className="flex h-14 w-14 items-center justify-center rounded-full border border-zinc-200 text-4xl dark:border-zinc-800 dark:text-white">
             <HiChartBar className="h-5 w-5" />
           </div>
@@ -139,7 +139,7 @@ export default function CountDateChart() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <DatePicker
               dateRange={dateRange}
               onDateRangeChange={setDateRange}

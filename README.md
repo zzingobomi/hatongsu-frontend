@@ -1,4 +1,8 @@
-### Hatongsu frontend
+### Hatongsu Frontend
+
+### Architecture
+
+![Architecture](./docs/architecture.svg)
 
 ### Roadmap
 

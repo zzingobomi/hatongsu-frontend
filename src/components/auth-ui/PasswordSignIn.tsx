@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "next/navigation";
-import React from "react";
+import React, { Suspense } from "react";
 import {
   Form,
   FormControl,
@@ -26,11 +26,21 @@ const loginSchema = z.object({
   password: z.string().trim().min(1, "비밀번호를 입력해주세요"),
 });
 
-export default function PasswordSignIn() {
+function ErrorDisplay() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
   const code = searchParams.get("code") as keyof typeof ERROR_MESSAGES | null;
 
+  if (!error || !code) return null;
+
+  return (
+    <div className="text-red-500 text-sm text-center">
+      {ERROR_MESSAGES[code]}
+    </div>
+  );
+}
+
+export default function PasswordSignIn() {
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -86,11 +96,17 @@ export default function PasswordSignIn() {
               </FormItem>
             )}
           />
-          {error && code && (
-            <div className="text-red-500 text-sm text-center">
-              {code && ERROR_MESSAGES[code]}
-            </div>
-          )}
+          <Suspense
+            fallback={
+              <div className="h-5 flex items-center justify-center">
+                <div className="animate-pulse text-sm text-gray-400">
+                  Checking...
+                </div>
+              </div>
+            }
+          >
+            <ErrorDisplay />
+          </Suspense>
           <Button
             type="submit"
             className="w-full"

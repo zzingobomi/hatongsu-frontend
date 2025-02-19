@@ -2,54 +2,9 @@
 
 ## My Project
 
-<div align="center" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;">
-
-  <!-- 프론트엔드 -->
-  <div style="text-align: center;">
-    <a href="https://github.com/zzingobomi/hatongsu-frontend" target="_blank" style="text-decoration: none; font-size: 1.2em; font-weight: bold;">
-      Hatongsu Frontend
-    </a>
-    <br>
-    <img src="https://img.shields.io/github/languages/top/zzingobomi/hatongsu-frontend?style=for-the-badge" alt="Hatongsu Frontend"/>
-  </div>
-
-  <!-- 백엔드 -->
-  <div style="text-align: center;">
-    <a href="https://github.com/zzingobomi/hatongsu-backend" target="_blank" style="text-decoration: none; font-size: 1.2em; font-weight: bold;">
-      Hatongsu Backend
-    </a>
-    <br>
-    <img src="https://img.shields.io/github/languages/top/zzingobomi/hatongsu-backend?style=for-the-badge" alt="Hatongsu Backend"/>
-  </div>
-
-  <!-- 월드 서버 -->
-  <div style="text-align: center;">
-    <a href="https://github.com/zzingobomi/hatongsu-world-server" target="_blank" style="text-decoration: none; font-size: 1.2em; font-weight: bold;">
-      Hatongsu World Server
-    </a>
-    <br>
-    <img src="https://img.shields.io/github/languages/top/zzingobomi/hatongsu-world-server?style=for-the-badge" alt="Hatongsu World Server"/>
-  </div>
-
-  <!-- 이벤트 서버 -->
-  <div style="text-align: center;">
-    <a href="https://github.com/zzingobomi/hatongsu-event-server" target="_blank" style="text-decoration: none; font-size: 1.2em; font-weight: bold;">
-      Hatongsu Event Server
-    </a>
-    <br>
-    <img src="https://img.shields.io/github/languages/top/zzingobomi/hatongsu-event-server?style=for-the-badge" alt="Hatongsu Event Server"/>
-  </div>
-
-  <!-- 인프라 -->
-  <div style="text-align: center;">
-    <a href="https://github.com/zzingobomi/on-premise" target="_blank" style="text-decoration: none; font-size: 1.2em; font-weight: bold;">
-      Hatongsu Infra
-    </a>
-    <br>
-    <img src="https://img.shields.io/github/languages/top/zzingobomi/on-premise?style=for-the-badge" alt="Hatongsu Infra"/>
-  </div>
-
-</div>
+|                                                 [Frontend](https://github.com/zzingobomi/hatongsu-frontend)                                                  |                                                 [Backend](https://github.com/zzingobomi/hatongsu-backend)                                                 |                                                   [World Server](https://github.com/zzingobomi/hatongsu-world-server)                                                    |                                                   [Event Server](https://github.com/zzingobomi/hatongsu-event-server)                                                    |                                              [Infra](https://github.com/zzingobomi/on-premise)                                              |
+| :----------------------------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------: |
+| [![Frontend](https://img.shields.io/github/languages/top/zzingobomi/hatongsu-frontend?style=for-the-badge)](https://github.com/zzingobomi/hatongsu-frontend) | [![Backend](https://img.shields.io/github/languages/top/zzingobomi/hatongsu-backend?style=for-the-badge)](https://github.com/zzingobomi/hatongsu-backend) | [![World Server](https://img.shields.io/github/languages/top/zzingobomi/hatongsu-world-server?style=for-the-badge)](https://github.com/zzingobomi/hatongsu-world-server) | [![Event Server](https://img.shields.io/github/languages/top/zzingobomi/hatongsu-event-server?style=for-the-badge)](https://github.com/zzingobomi/hatongsu-event-server) | [![Infra](https://img.shields.io/github/languages/top/zzingobomi/on-premise?style=for-the-badge)](https://github.com/zzingobomi/on-premise) |
 
 ## Architecture
 

@@ -15,7 +15,7 @@
   
   <h3>3D 갤러리</h3>
   <p align="center">
-    <img src="./docs/hatongsu_gallery_1.png" width="45%" style="vertical-align: middle">
+    <img src="./docs/hatongsu_gallery_1.jpg" width="45%" style="vertical-align: middle">
     <img src="./docs/hatongsu_gallery_2.png" width="45%" style="vertical-align: middle">
   </p>
 

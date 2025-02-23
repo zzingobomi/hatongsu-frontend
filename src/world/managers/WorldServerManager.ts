@@ -6,6 +6,7 @@ import {
   WSMessageType,
 } from "../shared/worldserver.type";
 import { IManager, Managers } from "./Managers";
+import PubSub from "pubsub-js";
 
 export class WorldServerManager implements IManager {
   private channel: ClientChannel;
@@ -29,20 +30,56 @@ export class WorldServerManager implements IManager {
     this.channel.close();
   }
 
-  private connectToServer(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.channel.onConnect((error) => {
-        if (error) {
-          console.error("Error connecting to World Server", error);
-          reject(error);
-        } else {
-          if (this.channel.id) {
-            this.playerId = this.channel.id.toString();
+  private async connectToServer(): Promise<void> {
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY = 1000;
+    const CONNECTION_TIMEOUT = 5000;
+
+    let retryCount = 0;
+
+    const attemptConnection = async (): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+          reject(
+            new Error(`Connection timed out after ${CONNECTION_TIMEOUT}ms`)
+          );
+        }, CONNECTION_TIMEOUT);
+
+        this.channel.onConnect((error) => {
+          clearTimeout(timeoutId);
+
+          if (error) {
+            reject(error);
+          } else {
+            if (this.channel.id) {
+              this.playerId = this.channel.id.toString();
+            }
+            resolve();
           }
-          resolve();
-        }
+        });
       });
-    });
+    };
+
+    try {
+      while (retryCount < MAX_RETRIES) {
+        try {
+          console.log(`Connection attempt ${retryCount + 1}/${MAX_RETRIES}`);
+          await attemptConnection();
+          return;
+        } catch (error) {
+          retryCount++;
+          console.error(`Connection failed (attempt ${retryCount}):`, error);
+
+          if (retryCount < MAX_RETRIES) {
+            await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+          }
+        }
+      }
+
+      throw new Error(`Failed to connect after ${MAX_RETRIES} attempts`);
+    } catch (error) {
+      PubSub.publish("WORLD_CONNECTION_FAILED", error);
+    }
   }
 
   public GetPlayerId(): string {

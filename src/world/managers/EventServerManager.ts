@@ -49,7 +49,7 @@ export class EventServerManager implements IManager {
       this.client
         .join(ESGalleryRoomName, options)
         .then((room) => {
-          console.log("joined room", room);
+          //console.log("joined room", room);
           this.sessionId = room.sessionId;
           this.room = room as Colyseus.Room<GalleryRoomState>;
           resolve();
@@ -110,7 +110,7 @@ export class EventServerManager implements IManager {
   }
 
   private handleChatMessage(message: ESChatMessage) {
-    console.log("Chat message received", message);
+    //console.log("Chat message received", message);
     const isMine = message.sessionId === this.sessionId;
     useChatStore.getState().addMessage({ ...message, isMine });
 

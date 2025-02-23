@@ -93,7 +93,7 @@ export default function ChatView() {
                     return (
                       <div
                         key={index}
-                        className={`flex ${
+                        className={`flex min-w-0 ${
                           isServer
                             ? "justify-center"
                             : isOwnMessage
@@ -102,7 +102,7 @@ export default function ChatView() {
                         }`}
                       >
                         <div
-                          className={`max-w-[80%] flex flex-col ${
+                          className={`max-w-[80%] min-w-0 flex flex-col ${
                             isServer ? "items-center w-full" : ""
                           }`}
                         >
@@ -119,7 +119,7 @@ export default function ChatView() {
                                 : isOwnMessage
                                 ? "bg-blue-500 text-white rounded-br-sm"
                                 : "bg-gray-200 rounded-tl-sm"
-                            } whitespace-normal break-words`}
+                            } whitespace-normal break-words w-full`}
                           >
                             <p>{message.message}</p>
                           </div>

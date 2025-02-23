@@ -115,14 +115,13 @@ export default function HeaderLinks() {
       >
         <HiOutlineArrowRightOnRectangle className="h-4 w-4 stroke-2 text-zinc-950 dark:text-white" />
       </Button>
-      <a className="w-full" href="/dashboard/settings">
-        <Avatar className="h-9 min-w-9 md:min-h-10 md:min-w-10">
-          <AvatarImage src={user?.profile} />
-          <AvatarFallback className="font-bold">
-            {user?.nickname ? user.nickname.charAt(0) : ""}
-          </AvatarFallback>
-        </Avatar>
-      </a>
+
+      <Avatar className="h-9 min-w-9 md:min-h-10 md:min-w-10">
+        <AvatarImage src={user?.profile} />
+        <AvatarFallback className="font-bold">
+          {user?.nickname ? user.nickname.charAt(0) : ""}
+        </AvatarFallback>
+      </Avatar>
     </div>
   );
 }
